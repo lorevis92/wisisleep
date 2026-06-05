@@ -1,8 +1,6 @@
-import fetch from 'node-fetch'
+const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args))
 
-export const config = { maxDuration: 30 }
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const q = req.query.q || 'nature'
   const base = 'https://librivox.org/api/feed/audiobooks'
   const qs = `&format=json&extended=1&limit=12`
@@ -39,7 +37,7 @@ export default async function handler(req, res) {
           totalDuration: sections.reduce((sum, s) => sum + s.duration, 0),
           sections,
         }
-      }))
+      })
     res.status(200).json(books)
   } catch (e) {
     res.status(500).json({ error: e.message, stack: e.stack })
