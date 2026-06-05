@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { T, CATEGORIES, NATURE_TAGS, PODCAST_CATEGORIES } from '../utils/constants'
 import { fetchNatureSounds, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
@@ -10,6 +10,9 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState('')
   const [loadingEpisode, setLoadingEpisode] = useState(null)
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debounceRef = useRef(null)
 
   const TAGS_BY_CATEGORY = {
     nature: NATURE_TAGS,
@@ -38,11 +41,44 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
     doSearch(activeCategory, '')
     setQuery('')
     setActiveTag('')
+    setSuggestions([])
+    setShowSuggestions(false)
   }, [activeCategory])
 
   const handleSearch = (e) => {
     e.preventDefault()
+    setSuggestions([])
+    setShowSuggestions(false)
     if (query.trim()) doSearch(activeCategory, query.trim())
+  }
+
+  const handleQueryChange = (e) => {
+    const val = e.target.value
+    setQuery(val)
+    if (activeCategory !== 'audiobook' || val.length < 2) {
+      clearTimeout(debounceRef.current)
+      setSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/audiobooks?q=${encodeURIComponent(val)}`)
+        const data = await res.json()
+        setSuggestions(data.slice(0, 6))
+        setShowSuggestions(true)
+      } catch {
+        setSuggestions([])
+      }
+    }, 400)
+  }
+
+  const handleSuggestionClick = (book) => {
+    setQuery(book.title)
+    setSuggestions([])
+    setShowSuggestions(false)
+    doSearch(activeCategory, book.title)
   }
 
   const handlePlay = async (track) => {
@@ -125,17 +161,40 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
 
       {/* Search */}
       <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={`Search ${CATEGORIES.find(c => c.id === activeCategory)?.label}...`}
-          style={{
-            flex: 1, fontFamily: 'Syne, sans-serif', fontSize: 13,
-            border: `1px solid ${T.border}`, borderRadius: 4,
-            padding: '8px 12px', background: T.bg, color: T.text,
-            outline: 'none',
-          }}
-        />
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            value={query}
+            onChange={handleQueryChange}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            placeholder={`Search ${CATEGORIES.find(c => c.id === activeCategory)?.label}...`}
+            style={{
+              width: '100%', fontFamily: 'Syne, sans-serif', fontSize: 13,
+              border: `1px solid ${T.border}`, borderRadius: 4,
+              padding: '8px 12px', background: T.bg, color: T.text,
+              outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 2,
+              background: '#fff', border: '1px solid #E8E8E8', borderRadius: 4, zIndex: 50,
+            }}>
+              {suggestions.map((book, i) => (
+                <div
+                  key={book.id || i}
+                  onMouseDown={() => handleSuggestionClick(book)}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F8F8F8'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  style={{ padding: '10px 14px', fontSize: 13, fontFamily: 'Syne, sans-serif', cursor: 'pointer' }}
+                >
+                  <span style={{ fontWeight: 700, color: T.text }}>{book.title}</span>
+                  {book.author && <span style={{ color: T.textSecondary }}> — {book.author}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <button type="submit" style={{
           fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
           letterSpacing: '0.05em', textTransform: 'uppercase',
