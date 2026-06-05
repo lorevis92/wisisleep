@@ -81,15 +81,15 @@ export async function fetchPodcastEpisodes(feedUrl) {
 }
 
 // ─── Audiobooks (hardcoded) ───────────────────────────────────────────────────
-const AUDIOBOOK_LIST = [
-  { id: 'lv-1', title: 'Meditations — Book 1', author: 'Marcus Aurelius', duration: 2700, audioUrl: 'https://archive.org/download/meditations_librivox/meditations_01_aurelius_64kb.mp3', coverUrl: null, type: 'audiobook', tags: ['philosophy', 'stoic'], description: 'Stoic philosophy for a calm mind.' },
-  { id: 'lv-2', title: 'The Secret Garden — Ch. 1', author: 'F.H. Burnett', duration: 1800, audioUrl: 'https://archive.org/download/secret_garden_0709_librivox/secretgarden_01_burnett_64kb.mp3', coverUrl: null, type: 'audiobook', tags: ['classic', 'nature'], description: 'A classic story of healing.' },
-  { id: 'lv-3', title: 'Pride and Prejudice — Ch. 1', author: 'Jane Austen', duration: 2400, audioUrl: 'https://archive.org/download/pride_and_prejudice_0711_librivox/prideandprejudice_01_austen_64kb.mp3', coverUrl: null, type: 'audiobook', tags: ['classic', 'romance'], description: 'Timeless Jane Austen romance.' },
-  { id: 'lv-4', title: 'War of the Worlds — Ch. 1', author: 'H.G. Wells', duration: 1500, audioUrl: 'https://archive.org/download/war_of_the_worlds_0611_librivox/waroftheworlds_01_wells_64kb.mp3', coverUrl: null, type: 'audiobook', tags: ['scifi', 'classic'], description: 'Classic sci-fi adventure.' }
-]
-
-export async function fetchAudiobooks() {
-  return AUDIOBOOK_LIST
+export async function fetchAudiobooks(query = 'nature') {
+  try {
+    const res = await fetch(`/api/audiobooks?q=${encodeURIComponent(query)}`)
+    const data = await res.json()
+    return (data || []).map(book => ({ ...book, coverUrl: null, tags: [] }))
+  } catch (e) {
+    console.error('Audiobooks error:', e)
+    return []
+  }
 }
 
 function parseDuration(playtime) {
