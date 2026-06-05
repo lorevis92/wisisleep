@@ -46,6 +46,25 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
   }
 
   const handlePlay = async (track) => {
+    if (track.type === 'audiobook') {
+      const section = track.sections?.find(s => s.audioUrl)
+      if (section) {
+        onPlay({
+          id: track.id + '-' + section.id,
+          title: track.title + ' — ' + section.title,
+          author: track.author,
+          audioUrl: section.audioUrl,
+          duration: section.duration,
+          type: 'audiobook',
+          coverUrl: track.coverUrl,
+          tags: track.tags,
+          description: track.description,
+        })
+      } else {
+        onPlay(track)
+      }
+      return
+    }
     if (track.type !== 'podcast') {
       onPlay(track)
       return

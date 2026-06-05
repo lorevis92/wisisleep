@@ -3,7 +3,7 @@ export const config = { maxDuration: 30 }
 export default async function handler(req, res) {
   const q = req.query.q || 'nature'
   try {
-    const response = await fetch(`https://librivox.org/api/feed/audiobooks/?title=${encodeURIComponent(q)}&format=json&extended=1&limit=24`)
+    const response = await fetch(`https://librivox.org/api/feed/audiobooks/?genre=${encodeURIComponent(q)}&format=json&extended=1&limit=24`)
     const data = await response.json()
     const books = (data.books || []).map(book => ({
       id: 'lv-' + book.id,
