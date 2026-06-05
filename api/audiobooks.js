@@ -4,18 +4,15 @@ export default async function handler(req, res) {
   const q = req.query.q || 'nature'
   const base = 'https://librivox.org/api/feed/audiobooks'
   const qs = `&format=json&extended=1&limit=12`
-  const firstWord = q.trim().split(/\s+/)[0]
   try {
-    const fetches = [
+    const [byTitle, byAuthor] = await Promise.all([
       fetch(`${base}/?title=${encodeURIComponent(q)}${qs}`).then(r => r.json()),
       fetch(`${base}/?author=${encodeURIComponent(q)}${qs}`).then(r => r.json()),
-      ...(firstWord !== q.trim()
-        ? [fetch(`${base}/?author=${encodeURIComponent(firstWord)}${qs}`).then(r => r.json())]
-        : []),
-    ]
-    const results = await Promise.all(fetches)
+    ])
+    console.log('byTitle raw:', JSON.stringify(byTitle))
+    console.log('byAuthor raw:', JSON.stringify(byAuthor))
     const seen = new Set()
-    const books = results.flatMap(d => d.books || [])
+    const books = [...(byTitle.books || []), ...(byAuthor.books || [])]
       .filter(book => {
         if (seen.has(book.id)) return false
         seen.add(book.id)
