@@ -1,3 +1,5 @@
+import fetch from 'node-fetch'
+
 export const config = { maxDuration: 30 }
 
 export default async function handler(req, res) {
@@ -40,7 +42,7 @@ export default async function handler(req, res) {
       }))
     res.status(200).json(books)
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    res.status(500).json({ error: e.message, stack: e.stack })
   }
 }
 

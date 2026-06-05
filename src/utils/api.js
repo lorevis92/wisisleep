@@ -85,6 +85,7 @@ export async function fetchAudiobooks(query = 'nature') {
   try {
     const res = await fetch(`/api/audiobooks?q=${encodeURIComponent(query)}`)
     const data = await res.json()
+    console.log('Audiobooks response:', data)
     return (data || []).map(book => ({ ...book, coverUrl: null, tags: [] }))
   } catch (e) {
     console.error('Audiobooks error:', e)
