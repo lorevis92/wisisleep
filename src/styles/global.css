@@ -1,0 +1,57 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #F8F8F8;
+  --surfaceAlt: #F0F0F0;
+  --border: #E8E8E8;
+  --text: #111111;
+  --textSecondary: #666666;
+  --textMuted: #AAAAAA;
+  --primary: #E8352A;
+  --primaryLight: rgba(232, 53, 42, 0.06);
+  --primaryBorder: rgba(232, 53, 42, 0.18);
+  --green: #00996A;
+  --yellow: #B87000;
+
+  --font-ui: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --radius-card: 6px;
+  --radius-section: 4px;
+  --radius-btn: 3px;
+}
+
+html, body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-ui);
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: var(--font-ui);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--textMuted); }
