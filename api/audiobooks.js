@@ -22,19 +22,24 @@ export default async function handler(req, res) {
         return true
       })
       .slice(0, 24)
-      .map(book => ({
-        id: 'lv-' + book.id,
-        title: book.title,
-        author: book.authors?.[0] ? (book.authors[0].first_name + ' ' + book.authors[0].last_name).trim() : 'Unknown',
-        type: 'audiobook',
-        description: (book.description || '').replace(/<[^>]*>/g, '').slice(0, 120),
-        language: book.language,
-        sections: (book.sections || []).map(s => ({
+      .map(book => {
+        const sections = (book.sections || []).map(s => ({
           id: 'lv-sec-' + s.id,
           title: s.title,
           audioUrl: s.listen_url,
           duration: parseDuration(s.playtime)
         }))
+        return {
+          id: 'lv-' + book.id,
+          title: book.title,
+          author: book.authors?.[0] ? (book.authors[0].first_name + ' ' + book.authors[0].last_name).trim() : 'Unknown',
+          type: 'audiobook',
+          description: (book.description || '').replace(/<[^>]*>/g, '').slice(0, 120),
+          language: book.language,
+          coverUrl: null,
+          totalDuration: sections.reduce((sum, s) => sum + s.duration, 0),
+          sections,
+        }
       }))
     res.status(200).json(books)
   } catch (e) {
