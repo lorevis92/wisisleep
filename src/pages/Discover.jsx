@@ -87,22 +87,21 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
       if (typeof sections === 'string') {
         try { sections = JSON.parse(sections) } catch { sections = [] }
       }
-      const first = Array.isArray(sections) && sections.find(s => s.audioUrl)
+      const first = Array.isArray(sections) && sections[0]?.audioUrl ? sections[0] : null
       if (first) {
         onPlay({
-          id: track.id + '-sec-0',
+          id: track.id + '-0',
           title: track.title + ' — ' + (first.title || 'Chapter 1'),
           author: track.author,
           audioUrl: first.audioUrl,
           duration: first.duration || 0,
           type: 'audiobook',
-          coverUrl: track.coverUrl || null,
-          tags: track.tags || [],
+          coverUrl: null,
+          tags: [],
           description: track.description || '',
-          allSections: sections,
         })
       } else {
-        onPlay(track)
+        alert('No audio available for this book')
       }
       return
     }
