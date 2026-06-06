@@ -94,10 +94,12 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         if (typeof sections === 'string') {
           try { sections = JSON.parse(sections) } catch { sections = [] }
         }
+        let coverUrl = null
         if (!Array.isArray(sections) || sections.length === 0 || !sections[0]?.audioUrl) {
-          // Fallback: fetch from chapters API
           const res = await fetch('/api/audiobook-chapters?id=' + track.librivoxId)
-          sections = await res.json()
+          const data = await res.json()
+          sections = data.sections || []
+          coverUrl = data.coverUrl || null
         }
         if (!Array.isArray(sections) || sections.length === 0 || !sections[0]?.audioUrl) {
           alert('No audio available for this book')
@@ -110,7 +112,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           audioUrl: s.audioUrl,
           duration: s.duration,
           type: 'audiobook',
-          coverUrl: null,
+          coverUrl,
           tags: [],
           description: track.description,
         }))
