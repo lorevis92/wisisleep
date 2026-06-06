@@ -60,6 +60,7 @@ export default function App() {
             onStartTimer={startTimer}
             onCancelTimer={cancelTimer}
             onPlay={handlePlay}
+            onChapterPlay={handlePlay}
           />
         )}
         {activeTab === 'library' && (

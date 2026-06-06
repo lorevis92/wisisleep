@@ -103,20 +103,8 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           alert('No audio available for this book')
           return
         }
-        onPlay({
-          id: track.id + '-ch0',
-          title: track.title + ' — ' + sections[0].title,
-          author: track.author,
-          audioUrl: sections[0].audioUrl,
-          duration: sections[0].duration,
-          type: 'audiobook',
-          coverUrl: null,
-          tags: [],
-          description: track.description,
-          allChapters: sections,
-        })
-        sections.slice(1).forEach((s, i) => addToQueue({
-          id: track.id + '-ch' + (i + 1),
+        const allChapters = sections.map((s, i) => ({
+          id: track.id + '-ch' + i,
           title: track.title + ' — ' + s.title,
           author: track.author,
           audioUrl: s.audioUrl,
@@ -124,8 +112,10 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           type: 'audiobook',
           coverUrl: null,
           tags: [],
-          description: '',
+          description: track.description,
         }))
+        onPlay({ ...allChapters[0], allChapters })
+        sections.slice(1).forEach((s, i) => addToQueue(allChapters[i + 1]))
       } catch (e) {
         console.error('Failed to load chapters:', e)
         alert('Failed to load chapters')

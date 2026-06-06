@@ -5,7 +5,6 @@ export function usePlayer() {
   const timerRef = useRef(null)
   const fadeRef = useRef(null)
   const queueRef = useRef([])
-  const playNextRef = useRef(null)
 
   const [currentTrack, setCurrentTrack] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -30,8 +29,17 @@ export function usePlayer() {
       setDuration(audio.duration)
     })
     audio.addEventListener('ended', () => {
-      setIsPlaying(false)
-      if (playNextRef.current) playNextRef.current()
+      if (queueRef.current.length > 0) {
+        const [next, ...rest] = queueRef.current
+        queueRef.current = rest
+        setQueue(rest)
+        audio.src = next.audioUrl
+        audio.play().catch(e => console.warn('Play error:', e))
+        setCurrentTrack(next)
+        setProgress(0)
+      } else {
+        setIsPlaying(false)
+      }
     })
     audio.addEventListener('play', () => setIsPlaying(true))
     audio.addEventListener('pause', () => setIsPlaying(false))
@@ -76,18 +84,7 @@ export function usePlayer() {
     setVolumeState(val)
   }, [])
 
-  const playNext = useCallback(() => {
-    if (queueRef.current.length > 0) {
-      const [next, ...rest] = queueRef.current
-      queueRef.current = rest
-      setQueue(rest)
-      playTrack(next)
-    }
-  }, [playTrack])
-
-  useEffect(() => {
-    playNextRef.current = playNext
-  }, [playNext])
+  useEffect(() => { queueRef.current = queue }, [queue])
 
   // Sleep timer
   const startTimer = useCallback((minutes) => {
@@ -168,6 +165,5 @@ export function usePlayer() {
     startTimer,
     cancelTimer,
     addToQueue,
-    playNext,
   }
 }

@@ -7,7 +7,7 @@ const TYPE_LABELS = { sounds: 'Nature Sound', music: 'Sleep Music', podcast: 'Po
 export default function Player({
   currentTrack, isPlaying, progress, duration,
   volume, sleepTimer, timeLeft, isFading,
-  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay,
+  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay,
 }) {
   const progressPct = duration > 0 ? (progress / duration) * 100 : 0
   const timerPct = sleepTimer > 0 ? (timeLeft / (sleepTimer * 60)) * 100 : 0
@@ -204,7 +204,6 @@ export default function Player({
           </div>
         )}
       </div>
-    </div>
 
       {/* Chapters */}
       {currentTrack.type === 'audiobook' && currentTrack.allChapters?.length > 0 && (
@@ -227,7 +226,7 @@ export default function Player({
               return (
                 <div
                   key={ch.id || i}
-                  onClick={() => onPlay({
+                  onClick={() => onChapterPlay({
                     id: chId,
                     title: bookTitle + ' — ' + ch.title,
                     author: currentTrack.author,
