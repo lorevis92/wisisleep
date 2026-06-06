@@ -86,20 +86,29 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
 
   const handlePlay = async (track) => {
     if (track.type === 'audiobook') {
+      console.log('Audiobook clicked:', track)
       setLoadingEpisode(track.id)
       try {
-        const res = await fetch('/api/audiobook-chapters?id=' + track.librivoxId)
-        const chapters = await res.json()
-        if (!Array.isArray(chapters) || chapters.length === 0 || !chapters[0].audioUrl) {
+        // Try sections already in book data first
+        let sections = track.sections
+        if (typeof sections === 'string') {
+          try { sections = JSON.parse(sections) } catch { sections = [] }
+        }
+        if (!Array.isArray(sections) || sections.length === 0 || !sections[0]?.audioUrl) {
+          // Fallback: fetch from chapters API
+          const res = await fetch('/api/audiobook-chapters?id=' + track.librivoxId)
+          sections = await res.json()
+        }
+        if (!Array.isArray(sections) || sections.length === 0 || !sections[0]?.audioUrl) {
           alert('No audio available for this book')
           return
         }
         onPlay({
           id: track.id + '-ch0',
-          title: track.title + ' — ' + chapters[0].title,
+          title: track.title + ' — ' + sections[0].title,
           author: track.author,
-          audioUrl: chapters[0].audioUrl,
-          duration: chapters[0].duration,
+          audioUrl: sections[0].audioUrl,
+          duration: sections[0].duration,
           type: 'audiobook',
           coverUrl: null,
           tags: [],

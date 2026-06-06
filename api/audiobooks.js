@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 export default async function handler(req, res) {
   const q = (req.query.q || 'nature').toLowerCase()
   try {
-    const url = `${SUPABASE_URL}/rest/v1/audiobooks?or=(title.ilike.*${encodeURIComponent(q)}*,author.ilike.*${encodeURIComponent(q)}*)&limit=24&select=id,title,author,description,language,genre`
+    const url = `${SUPABASE_URL}/rest/v1/audiobooks?or=(title.ilike.*${encodeURIComponent(q)}*,author.ilike.*${encodeURIComponent(q)}*)&limit=24&select=id,title,author,description,language,genre,sections`
     const response = await fetch(url, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
