@@ -1,11 +1,13 @@
-const handler = async (req, res) => {
+export const config = { maxDuration: 30 }
+
+export default async function handler(req, res) {
   const { id } = req.query
-  if (!id) return res.status(400).json({ error: 'Missing id param' })
+  if (!id) return res.status(200).json([])
   try {
     const response = await fetch(`https://librivox.org/api/feed/audiobooks/?id=${encodeURIComponent(id)}&format=json&extended=1`)
     const data = await response.json()
     const book = (data.books || [])[0]
-    if (!book) return res.status(404).json({ error: 'Book not found' })
+    if (!book) return res.status(200).json([])
     const sections = (book.sections || []).map(s => ({
       id: 'lv-sec-' + s.id,
       title: s.title,
@@ -14,7 +16,7 @@ const handler = async (req, res) => {
     }))
     res.status(200).json(sections)
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    res.status(200).json([])
   }
 }
 
@@ -25,5 +27,3 @@ function parseDuration(playtime) {
   if (parts.length === 2) return parts[0] * 60 + parts[1]
   return 0
 }
-
-module.exports = handler
