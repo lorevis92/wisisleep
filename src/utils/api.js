@@ -102,6 +102,7 @@ export async function fetchAudiobooks(query = 'nature') {
         coverUrl: null,
         tags: [],
         sections,
+        librivoxId: book.librivoxId || book.id?.replace('lv-', '') || '',
       }
     })
   } catch (e) {
