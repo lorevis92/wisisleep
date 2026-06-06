@@ -30,7 +30,10 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
       if (cat === 'nature') data = await fetchNatureSounds(term)
       else if (cat === 'sleep-music') data = await fetchSleepMusic(term)
       else if (cat === 'podcast') data = await fetchPodcasts(term)
-      else if (cat === 'audiobook') data = await fetchAudiobooks(term)
+      else if (cat === 'audiobook') {
+        data = await fetchAudiobooks(term)
+        if (data.length > 0) console.log('First book sections:', data[0].sections)
+      }
       setResults(data)
     } finally {
       setLoading(false)
@@ -83,25 +86,30 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
 
   const handlePlay = async (track) => {
     if (track.type === 'audiobook') {
-      let sections = track.sections
-      if (typeof sections === 'string') {
-        try { sections = JSON.parse(sections) } catch { sections = [] }
-      }
-      const first = Array.isArray(sections) && sections[0]?.audioUrl ? sections[0] : null
-      if (first) {
+      setLoadingEpisode(track.id)
+      try {
+        const res = await fetch('/api/audiobook-chapters?id=' + track.librivoxId)
+        const chapters = await res.json()
+        if (!Array.isArray(chapters) || chapters.length === 0 || !chapters[0].audioUrl) {
+          alert('No audio available for this book')
+          return
+        }
         onPlay({
-          id: track.id + '-0',
-          title: track.title + ' — ' + (first.title || 'Chapter 1'),
+          id: track.id + '-ch0',
+          title: track.title + ' — ' + chapters[0].title,
           author: track.author,
-          audioUrl: first.audioUrl,
-          duration: first.duration || 0,
+          audioUrl: chapters[0].audioUrl,
+          duration: chapters[0].duration,
           type: 'audiobook',
           coverUrl: null,
           tags: [],
-          description: track.description || '',
+          description: track.description,
         })
-      } else {
-        alert('No audio available for this book')
+      } catch (e) {
+        console.error('Failed to load chapters:', e)
+        alert('Failed to load chapters')
+      } finally {
+        setLoadingEpisode(null)
       }
       return
     }

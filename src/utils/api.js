@@ -85,8 +85,25 @@ export async function fetchAudiobooks(query = 'nature') {
   try {
     const res = await fetch(`/api/audiobooks?q=${encodeURIComponent(query)}`)
     const data = await res.json()
-    console.log('Audiobooks response:', data)
-    return (data || []).map(book => ({ ...book, coverUrl: null, tags: [] }))
+    return (data || []).map(book => {
+      let sections = book.sections
+      if (typeof sections === 'string') {
+        try { sections = JSON.parse(sections) } catch { sections = [] }
+      }
+      if (!Array.isArray(sections)) sections = []
+      return {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        description: book.description,
+        language: book.language,
+        genre: book.genre,
+        type: 'audiobook',
+        coverUrl: null,
+        tags: [],
+        sections,
+      }
+    })
   } catch (e) {
     console.error('Audiobooks error:', e)
     return []
