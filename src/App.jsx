@@ -15,7 +15,7 @@ export default function App() {
     currentTrack, isPlaying, progress, duration,
     volume, sleepTimer, timeLeft, isFading,
     playTrack, togglePlay, seek, setVolume,
-    startTimer, cancelTimer,
+    startTimer, cancelTimer, addToQueue,
   } = usePlayer()
 
   const { library, addToLibrary, removeFromLibrary, isInLibrary, clearLibrary } = useLibrary()
@@ -41,6 +41,7 @@ export default function App() {
             currentTrack={currentTrack}
             onSave={handleSave}
             isInLibrary={isInLibrary}
+            addToQueue={addToQueue}
           />
         )}
         {activeTab === 'player' && (
@@ -58,6 +59,7 @@ export default function App() {
             onVolume={setVolume}
             onStartTimer={startTimer}
             onCancelTimer={cancelTimer}
+            onPlay={handlePlay}
           />
         )}
         {activeTab === 'library' && (

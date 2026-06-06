@@ -7,7 +7,7 @@ const TYPE_LABELS = { sounds: 'Nature Sound', music: 'Sleep Music', podcast: 'Po
 export default function Player({
   currentTrack, isPlaying, progress, duration,
   volume, sleepTimer, timeLeft, isFading,
-  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer,
+  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay,
 }) {
   const progressPct = duration > 0 ? (progress / duration) * 100 : 0
   const timerPct = sleepTimer > 0 ? (timeLeft / (sleepTimer * 60)) * 100 : 0
@@ -204,6 +204,71 @@ export default function Player({
           </div>
         )}
       </div>
+    </div>
+
+      {/* Chapters */}
+      {currentTrack.type === 'audiobook' && currentTrack.allChapters?.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{
+            fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+            color: T.textSecondary, textTransform: 'uppercase', letterSpacing: '0.06em',
+            marginBottom: 12,
+          }}>
+            Chapters
+          </div>
+          <div style={{ display: 'flex', overflowX: 'auto', gap: 8, paddingBottom: 8 }}>
+            {currentTrack.allChapters.map((ch, i) => {
+              const baseId = currentTrack.id.replace(/-ch\d+$/, '')
+              const chId = baseId + '-ch' + i
+              const isActive = currentTrack.id === chId
+              const bookTitle = currentTrack.title.includes(' — ')
+                ? currentTrack.title.split(' — ').slice(0, -1).join(' — ')
+                : currentTrack.title
+              return (
+                <div
+                  key={ch.id || i}
+                  onClick={() => onPlay({
+                    id: chId,
+                    title: bookTitle + ' — ' + ch.title,
+                    author: currentTrack.author,
+                    audioUrl: ch.audioUrl,
+                    duration: ch.duration,
+                    type: 'audiobook',
+                    coverUrl: null,
+                    tags: [],
+                    description: currentTrack.description || '',
+                    allChapters: currentTrack.allChapters,
+                  })}
+                  style={{
+                    borderRadius: 4,
+                    border: `1px solid ${isActive ? T.primary : T.border}`,
+                    padding: '10px 12px',
+                    minWidth: 120,
+                    cursor: 'pointer',
+                    background: isActive ? T.primaryLight : '#fff',
+                    flexShrink: 0,
+                  }}
+                >
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace', fontSize: 10,
+                    color: T.textMuted, marginBottom: 4,
+                  }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div style={{
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                    color: T.text,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    maxWidth: 100,
+                  }}>
+                    {ch.title}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

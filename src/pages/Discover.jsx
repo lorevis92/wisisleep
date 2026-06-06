@@ -3,7 +3,7 @@ import { T, CATEGORIES, NATURE_TAGS, PODCAST_CATEGORIES } from '../utils/constan
 import { fetchNatureSounds, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
 
-export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) {
+export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, addToQueue }) {
   const [activeCategory, setActiveCategory] = useState('nature')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -113,7 +113,19 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
           coverUrl: null,
           tags: [],
           description: track.description,
+          allChapters: sections,
         })
+        sections.slice(1).forEach((s, i) => addToQueue({
+          id: track.id + '-ch' + (i + 1),
+          title: track.title + ' — ' + s.title,
+          author: track.author,
+          audioUrl: s.audioUrl,
+          duration: s.duration,
+          type: 'audiobook',
+          coverUrl: null,
+          tags: [],
+          description: '',
+        }))
       } catch (e) {
         console.error('Failed to load chapters:', e)
         alert('Failed to load chapters')
