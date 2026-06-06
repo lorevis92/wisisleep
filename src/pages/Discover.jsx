@@ -83,18 +83,23 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary }) 
 
   const handlePlay = async (track) => {
     if (track.type === 'audiobook') {
-      const section = track.sections?.find(s => s.audioUrl)
-      if (section) {
+      let sections = track.sections
+      if (typeof sections === 'string') {
+        try { sections = JSON.parse(sections) } catch { sections = [] }
+      }
+      const first = Array.isArray(sections) && sections.find(s => s.audioUrl)
+      if (first) {
         onPlay({
-          id: track.id + '-' + section.id,
-          title: track.title + ' — ' + section.title,
+          id: track.id + '-sec-0',
+          title: track.title + ' — ' + (first.title || 'Chapter 1'),
           author: track.author,
-          audioUrl: section.audioUrl,
-          duration: section.duration,
+          audioUrl: first.audioUrl,
+          duration: first.duration || 0,
           type: 'audiobook',
-          coverUrl: track.coverUrl,
-          tags: track.tags,
-          description: track.description,
+          coverUrl: track.coverUrl || null,
+          tags: track.tags || [],
+          description: track.description || '',
+          allSections: sections,
         })
       } else {
         onPlay(track)
