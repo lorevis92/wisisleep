@@ -165,6 +165,13 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
       }
       return
     }
+    if (track.type === 'music') {
+      onPlay(track)
+      const others = results.filter(t => t.type === 'music' && t.subcategory === track.subcategory && t.id !== track.id)
+      const shuffled = others.sort(() => Math.random() - 0.5)
+      shuffled.forEach(t => addToQueue(t))
+      return
+    }
     if (track.type !== 'podcast') {
       onPlay(track)
       return
