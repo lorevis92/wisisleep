@@ -39,10 +39,11 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   }
 
   const loadNatureSounds = (query) => {
+    console.log('Fetching with query:', query)
     setNatureLoading(true)
     setResults([])
     fetchNatureSounds(query)
-      .then(data => setResults(data))
+      .then(data => { console.log('Results:', data); setResults(data) })
       .finally(() => setNatureLoading(false))
   }
 
@@ -60,6 +61,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   }, [activeCategory])
 
   const handleNatureCategoryClick = (cat) => {
+    console.log('Category clicked:', cat)
     setActiveNatureCategory(cat.id)
     loadNatureSounds(cat.query)
   }
