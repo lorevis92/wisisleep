@@ -34,16 +34,16 @@ export async function fetchNatureSoundsFromDB(category) {
   }
 }
 
-// ─── Sleep Music (hardcoded) ──────────────────────────────────────────────────
-const SLEEP_MUSIC = [
-  { id: 'fm-1', title: 'Relaxing Piano', author: 'Kevin MacLeod', duration: 1800, audioUrl: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Relaxing%20Piano%20Music.mp3', coverUrl: null, type: 'music', tags: ['piano', 'calm'], description: 'Gentle piano for sleep.' },
-  { id: 'fm-2', title: 'Meditation Aquatic', author: 'Kevin MacLeod', duration: 2100, audioUrl: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Aquatic.mp3', coverUrl: null, type: 'music', tags: ['meditation', 'ambient'], description: 'Ambient meditation music.' },
-  { id: 'fm-3', title: 'Slow Burn', author: 'Kevin MacLeod', duration: 1920, audioUrl: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Slow%20Burn.mp3', coverUrl: null, type: 'music', tags: ['ambient', 'calm'], description: 'Slow ambient music.' },
-  { id: 'fm-4', title: 'Dreaming', author: 'Kevin MacLeod', duration: 2400, audioUrl: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dreaming.mp3', coverUrl: null, type: 'music', tags: ['dream', 'soft'], description: 'Soft dreamy music for sleep.' }
-]
-
+// ─── Sleep Music (Supabase via nature-sounds API) ────────────────────────────
 export async function fetchSleepMusic() {
-  return SLEEP_MUSIC
+  try {
+    const res = await fetch('/api/nature-sounds?category=sleep-music')
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) {
+    console.error('Sleep music error:', e)
+    return []
+  }
 }
 
 // ─── iTunes Search API (Podcasts) ────────────────────────────────────────────
