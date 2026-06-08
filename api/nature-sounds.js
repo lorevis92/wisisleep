@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       audioUrl: s.audio_url,
       coverUrl: s.image_url,
       category: s.category,
-      type: 'sounds',
+      type: s.category === 'sleep-music' ? 'music' : 'sounds',
     }))
     res.status(200).json(sounds)
   } catch (e) {

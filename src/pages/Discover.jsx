@@ -45,10 +45,8 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     fetchNatureSoundsFromDB(categoryId)
       .then(async dbData => {
         if (dbData.length > 0) {
-          console.log('Results from DB:', dbData)
           setResults(dbData)
         } else {
-          console.log('DB empty, falling back to Freesound query:', query)
           const catImage = NATURE_CATEGORIES.find(c => c.id === categoryId)?.image || null
           const fallback = await fetchNatureSounds(query)
           setResults(fallback.map(sound => ({ ...sound, coverUrl: catImage })))
@@ -114,7 +112,6 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
 
   const handlePlay = async (track) => {
     if (track.type === 'audiobook') {
-      console.log('Audiobook clicked:', track)
       setLoadingEpisode(track.id)
       try {
         // Try sections already in book data first

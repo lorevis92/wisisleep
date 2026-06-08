@@ -16,7 +16,6 @@ const TYPE_LABELS = {
 }
 
 export default function TrackCard({ track, onPlay, onSave, isSaved, isActive, isLoading }) {
-  console.log('TrackCard coverUrl:', track.id, track.coverUrl)
   return (
     <div style={{
       background: T.bg,
