@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { T, CATEGORIES, NATURE_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
-import { fetchNatureSounds, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
+import { fetchNatureSounds, fetchNatureSoundsFromDB, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
 
 export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, addToQueue }) {
@@ -39,15 +39,20 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     }
   }
 
-  const loadNatureSounds = (query) => {
-    console.log('Fetching with query:', query)
+  const loadNatureSounds = (categoryId, query) => {
     setNatureLoading(true)
     setResults([])
-    fetchNatureSounds(query)
-      .then(data => {
-        console.log('Results:', data)
-        const catImage = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)?.image || null
-        setResults(data.map(sound => ({ ...sound, coverUrl: catImage })))
+    fetchNatureSoundsFromDB(categoryId)
+      .then(async dbData => {
+        if (dbData.length > 0) {
+          console.log('Results from DB:', dbData)
+          setResults(dbData)
+        } else {
+          console.log('DB empty, falling back to Freesound query:', query)
+          const catImage = NATURE_CATEGORIES.find(c => c.id === categoryId)?.image || null
+          const fallback = await fetchNatureSounds(query)
+          setResults(fallback.map(sound => ({ ...sound, coverUrl: catImage })))
+        }
         setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
       })
       .finally(() => setNatureLoading(false))
@@ -56,7 +61,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   useEffect(() => {
     if (activeCategory === 'nature') {
       const cat = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)
-      loadNatureSounds(cat?.query || 'rain ambience relaxing loop')
+      loadNatureSounds(cat?.id || 'rain', cat?.query || 'rain ambience relaxing loop')
     } else {
       doSearch(activeCategory, '')
     }
@@ -67,9 +72,8 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   }, [activeCategory])
 
   const handleNatureCategoryClick = (cat) => {
-    console.log('Category clicked:', cat)
     setActiveNatureCategory(cat.id)
-    loadNatureSounds(cat.query)
+    loadNatureSounds(cat.id, cat.query)
   }
 
   const handleSearch = (e) => {

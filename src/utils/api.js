@@ -23,6 +23,17 @@ export async function fetchNatureSounds(query = 'rain') {
   }
 }
 
+export async function fetchNatureSoundsFromDB(category) {
+  try {
+    const res = await fetch(`/api/nature-sounds?category=${encodeURIComponent(category)}`)
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) {
+    console.error('Nature sounds DB error:', e)
+    return []
+  }
+}
+
 // ─── Sleep Music (hardcoded) ──────────────────────────────────────────────────
 const SLEEP_MUSIC = [
   { id: 'fm-1', title: 'Relaxing Piano', author: 'Kevin MacLeod', duration: 1800, audioUrl: 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Relaxing%20Piano%20Music.mp3', coverUrl: null, type: 'music', tags: ['piano', 'calm'], description: 'Gentle piano for sleep.' },
