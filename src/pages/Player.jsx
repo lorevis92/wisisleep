@@ -11,6 +11,7 @@ export default function Player({
   onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay,
 }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 640)
+  const [customMinutes, setCustomMinutes] = useState(30)
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 640)
@@ -18,18 +19,11 @@ export default function Player({
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  const progressPct = duration > 0 ? (progress / duration) * 100 : 0
-  const timeLeftMin = Math.floor(timeLeft / 60)
-  const timeLeftSec = timeLeft % 60
-
   if (!currentTrack) {
     return (
       <div style={{ padding: '60px 20px', textAlign: 'center' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🌙</div>
-        <p style={{
-          fontFamily: 'Syne, sans-serif', fontSize: 14,
-          color: T.textMuted, fontWeight: 600,
-        }}>
+        <p style={{ fontFamily: 'Syne, sans-serif', fontSize: 14, color: T.textMuted, fontWeight: 600 }}>
           Nothing playing yet.<br />Go to Discover to find something.
         </p>
       </div>
@@ -37,12 +31,25 @@ export default function Player({
   }
 
   const coverSize = isMobile ? 60 : 80
+  const progressPct = duration > 0 ? (progress / duration) * 100 : 0
+  const timeLeftMin = Math.floor(timeLeft / 60)
+  const timeLeftSec = timeLeft % 60
+  const isSound = currentTrack.type === 'sounds'
+  const isAudiobook = currentTrack.type === 'audiobook'
+  const allChapters = currentTrack.allChapters
+  const currentChapterIdx = allChapters?.findIndex(ch => ch.id === currentTrack.id) ?? -1
+  const hasPrev = isAudiobook && allChapters && currentChapterIdx > 0
+  const hasNext = isAudiobook && allChapters && currentChapterIdx < allChapters.length - 1
+
+  const playChapter = (idx) => {
+    onChapterPlay({ ...allChapters[idx], allChapters })
+  }
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', paddingTop: 8 }}>
 
-      {/* TOP: Cover + Track Info */}
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center', padding: 20 }}>
+      {/* 1. TOP ROW */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 20px 12px' }}>
         <div style={{
           width: coverSize, height: coverSize, borderRadius: 6, flexShrink: 0,
           overflow: 'hidden', background: T.primaryLight, border: `1px solid ${T.primaryBorder}`,
@@ -57,8 +64,8 @@ export default function Player({
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 9,
-            color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em',
+            fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 10,
+            color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 3,
           }}>
             {TYPE_LABELS[currentTrack.type]}
@@ -78,71 +85,100 @@ export default function Player({
               {currentTrack.author}
             </div>
           )}
-          <div
-            style={{
-              height: 3, background: T.surfaceAlt, borderRadius: 2,
-              marginTop: 8, cursor: 'pointer', position: 'relative',
-            }}
-            onClick={e => {
-              if (!duration) return
-              const rect = e.currentTarget.getBoundingClientRect()
-              onSeek(((e.clientX - rect.left) / rect.width) * duration)
-            }}
-          >
-            <div style={{
-              position: 'absolute', left: 0, top: 0, bottom: 0,
-              width: `${progressPct}%`,
-              background: T.primary, borderRadius: 2,
-              transition: 'width 0.5s linear',
-            }} />
-          </div>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            fontFamily: 'DM Mono, monospace', fontSize: 11, color: T.textMuted,
-            marginTop: 4,
-          }}>
-            <span>{formatDuration(Math.floor(progress))}</span>
-            <span>{formatDuration(Math.floor(duration))}</span>
-          </div>
+          {!isSound && (
+            <>
+              <div
+                style={{
+                  height: 3, background: '#F0F0F0', borderRadius: 2,
+                  marginTop: 8, cursor: 'pointer', position: 'relative',
+                }}
+                onClick={e => {
+                  if (!duration) return
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  onSeek(((e.clientX - rect.left) / rect.width) * duration)
+                }}
+              >
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${progressPct}%`,
+                  background: T.primary, borderRadius: 2,
+                  transition: 'width 0.5s linear',
+                }} />
+              </div>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                fontFamily: 'DM Mono, monospace', fontSize: 11, color: '#AAAAAA',
+                marginTop: 4,
+              }}>
+                <span>{formatDuration(Math.floor(progress))}</span>
+                <span>{formatDuration(Math.floor(duration))}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* CONTROLS */}
+      {/* 2. CONTROLS ROW */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        gap: 16, padding: '8px 20px',
+        gap: 20, padding: '4px 20px 12px',
       }}>
+        {isAudiobook && allChapters && (
+          <button
+            onClick={() => hasPrev && playChapter(currentChapterIdx - 1)}
+            style={{
+              fontSize: 22, color: hasPrev ? '#666666' : '#CCCCCC',
+              background: 'none', border: 'none',
+              cursor: hasPrev ? 'pointer' : 'default', padding: 0, lineHeight: 1,
+            }}
+          >
+            ⏮
+          </button>
+        )}
+
         <button
           onClick={onTogglePlay}
           style={{
-            width: 48, height: 48, borderRadius: '50%',
+            width: 52, height: 52, borderRadius: '50%',
             background: '#E8352A', color: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 20, border: 'none', cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(232,53,42,0.3)',
+            boxShadow: '0 4px 12px rgba(232,53,42,0.3)', flexShrink: 0,
           }}
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
+
+        {isAudiobook && allChapters && (
+          <button
+            onClick={() => hasNext && playChapter(currentChapterIdx + 1)}
+            style={{
+              fontSize: 22, color: hasNext ? '#666666' : '#CCCCCC',
+              background: 'none', border: 'none',
+              cursor: hasNext ? 'pointer' : 'default', padding: 0, lineHeight: 1,
+            }}
+          >
+            ⏭
+          </button>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+          <span style={{ fontSize: 12 }}>🔈</span>
+          <input
+            type="range" min={0} max={1} step={0.05} value={volume}
+            onChange={e => onVolume(parseFloat(e.target.value))}
+            style={{ width: 80, accentColor: '#E8352A' }}
+          />
+          <span style={{ fontSize: 12 }}>🔊</span>
+        </div>
       </div>
 
-      {/* VOLUME */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 20px 12px' }}>
-        <span style={{ fontSize: 13 }}>🔈</span>
-        <input
-          type="range" min={0} max={1} step={0.05} value={volume}
-          onChange={e => onVolume(parseFloat(e.target.value))}
-          style={{ flex: 1, accentColor: T.primary }}
-        />
-        <span style={{ fontSize: 13 }}>🔊</span>
-      </div>
-
-      {/* SLEEP TIMER */}
+      {/* 3. SLEEP TIMER ROW */}
       <div style={{ padding: '0 20px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{
             fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
-            color: T.textSecondary, textTransform: 'uppercase', letterSpacing: '0.06em',
+            color: '#666666', textTransform: 'uppercase', letterSpacing: '0.06em',
             flexShrink: 0,
           }}>
             🌙 Sleep Timer
@@ -169,37 +205,50 @@ export default function Player({
                   fontFamily: 'Syne, sans-serif', fontSize: 10, fontWeight: 700,
                   color: T.textMuted, textTransform: 'uppercase',
                   border: `1px solid ${T.border}`, borderRadius: 3,
-                  padding: '4px 8px', background: T.bg, cursor: 'pointer', marginLeft: 'auto',
+                  padding: '3px 8px', background: T.bg, cursor: 'pointer', marginLeft: 'auto',
                 }}
               >
                 Cancel
               </button>
             </>
           ) : (
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-              {TIMER_OPTIONS.filter(t => t.value > 0).map(t => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+              {[15, 30, 45, 60, 90].map(m => (
                 <button
-                  key={t.value}
-                  onClick={() => onStartTimer(t.value)}
+                  key={m}
+                  onClick={() => onStartTimer(m)}
                   style={{
                     fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 10,
                     letterSpacing: '0.04em', textTransform: 'uppercase',
-                    padding: '4px 8px', borderRadius: 3,
+                    padding: '3px 8px', borderRadius: 3,
                     border: `1px solid ${T.border}`,
                     background: T.bg, color: T.textSecondary, cursor: 'pointer',
                   }}
                 >
-                  {t.label}
+                  {m}m
                 </button>
               ))}
+              <input
+                type="range" min={1} max={120} step={1} value={customMinutes}
+                onChange={e => setCustomMinutes(Number(e.target.value))}
+                onMouseUp={() => onStartTimer(customMinutes)}
+                onTouchEnd={() => onStartTimer(customMinutes)}
+                style={{ width: 80, accentColor: '#E8352A' }}
+              />
+              <span style={{
+                fontFamily: 'DM Mono, monospace', fontSize: 11,
+                color: T.textMuted, flexShrink: 0,
+              }}>
+                ──{customMinutes}m
+              </span>
             </div>
           )}
         </div>
       </div>
 
-      {/* CHAPTERS */}
-      {currentTrack.type === 'audiobook' && currentTrack.allChapters?.length > 0 && (
-        <div style={{ padding: '0 20px' }}>
+      {/* 4. CHAPTERS ROW */}
+      {isAudiobook && allChapters?.length > 0 && (
+        <div style={{ padding: '0 20px 12px' }}>
           <div style={{
             fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
             color: '#666666', textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -207,34 +256,21 @@ export default function Player({
           }}>
             Chapters
           </div>
-          <div style={{ display: 'flex', overflowX: 'auto', gap: 6, paddingBottom: 12 }}>
-            {currentTrack.allChapters.map((ch, i) => {
-              const baseId = currentTrack.id.replace(/-ch\d+$/, '')
-              const chId = baseId + '-ch' + i
-              const isActive = currentTrack.id === chId
-              const bookTitle = currentTrack.title.includes(' — ')
-                ? currentTrack.title.split(' — ').slice(0, -1).join(' — ')
-                : currentTrack.title
+          <div style={{ display: 'flex', overflowX: 'auto', gap: 6, paddingBottom: 4 }}>
+            {allChapters.map((ch, i) => {
+              const isActive = currentTrack.id === ch.id
+              const chapterName = ch.title.includes(' — ')
+                ? ch.title.split(' — ').slice(-1)[0]
+                : ch.title
               return (
                 <div
                   key={ch.id || i}
-                  onClick={() => onChapterPlay({
-                    id: chId,
-                    title: bookTitle + ' — ' + ch.title,
-                    author: currentTrack.author,
-                    audioUrl: ch.audioUrl,
-                    duration: ch.duration,
-                    type: 'audiobook',
-                    coverUrl: currentTrack.coverUrl,
-                    tags: [],
-                    description: currentTrack.description || '',
-                    allChapters: currentTrack.allChapters,
-                  })}
+                  onClick={() => playChapter(i)}
                   style={{
                     borderRadius: 3,
                     border: `1px solid ${isActive ? T.primary : '#E8E8E8'}`,
-                    padding: '6px 10px',
-                    minWidth: 80, maxWidth: 120,
+                    padding: '5px 8px',
+                    minWidth: 70, maxWidth: 100,
                     cursor: 'pointer',
                     background: isActive ? T.primaryLight : '#fff',
                     flexShrink: 0,
@@ -242,7 +278,7 @@ export default function Player({
                 >
                   <div style={{
                     fontFamily: 'DM Mono, monospace', fontSize: 9,
-                    color: T.textMuted, marginBottom: 2,
+                    color: '#AAAAAA', marginBottom: 2,
                   }}>
                     {String(i + 1).padStart(2, '0')}
                   </div>
@@ -251,7 +287,7 @@ export default function Player({
                     color: isActive ? T.primary : T.text,
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   }}>
-                    {ch.title}
+                    {chapterName}
                   </div>
                 </div>
               )
