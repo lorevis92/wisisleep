@@ -367,7 +367,7 @@ function SectionTitle({ children }) {
 }
 
 // ─── Main Discover ────────────────────────────────────────────────────────────
-export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue }) {
+export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue, activeSection, onSectionConsumed }) {
   const [activeView, setActiveView] = useState(null) // null | 'nature' | 'sleep-music' | 'audiobooks' | 'podcasts'
   const [continueItems, setContinueItems] = useState([])
   const [natureTracks, setNatureTracks] = useState([])
@@ -379,6 +379,13 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
   const [loadingBooks, setLoadingBooks] = useState(true)
   const [loadingPods, setLoadingPods] = useState(true)
   const [loadingId, setLoadingId] = useState(null)
+
+  useEffect(() => {
+    if (activeSection) {
+      setActiveView(activeSection)
+      onSectionConsumed?.()
+    }
+  }, [activeSection])
 
   useEffect(() => {
     setContinueItems(getHistory())

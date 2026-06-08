@@ -32,12 +32,29 @@ export default function App() {
     localStorage.setItem('wisisleep_tab', tab)
   }
 
+  const [activeSection, setActiveSection] = useState(null)
+
   const handlePlay = (track) => {
     playTrack(track)
     handleTabChange('player')
   }
 
+  const handleNavigate = (section) => {
+    handleTabChange('discover')
+    setActiveSection(section)
+  }
+
   const handleGoodnightMode = async () => {
+    try {
+      const history = JSON.parse(localStorage.getItem('wisisleep_history') || '[]')
+      const natureSounds = history.filter(t => t.type === 'sounds')
+      if (natureSounds.length > 0) {
+        const random = natureSounds[Math.floor(Math.random() * natureSounds.length)]
+        playTrack(random)
+        startTimer(30)
+        return
+      }
+    } catch {}
     try {
       const res = await fetch('/api/nature-sounds?category=rain')
       const data = await res.json()
@@ -54,7 +71,12 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar activeTab={activeTab} onTabChange={handleTabChange} onGoodnightMode={handleGoodnightMode} />
+      <Navbar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onGoodnightMode={handleGoodnightMode}
+        onNavigate={handleNavigate}
+      />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 100 : 0 }}>
         {activeTab === 'discover' && (
@@ -64,6 +86,8 @@ export default function App() {
             onSave={handleSave}
             isInLibrary={isInLibrary}
             addToQueue={addToQueue}
+            activeSection={activeSection}
+            onSectionConsumed={() => setActiveSection(null)}
           />
         )}
         {activeTab === 'player' && (
