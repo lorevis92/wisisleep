@@ -13,7 +13,9 @@ export function usePlayer() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [volume, setVolumeState] = useState(0.8)
+  const [volume, setVolumeState] = useState(
+    () => parseFloat(localStorage.getItem('wisisleep_volume') || '0.8')
+  )
   const [sleepTimer, setSleepTimer] = useState(0)
   const [timeLeft, setTimeLeft] = useState(0)
   const [isFading, setIsFading] = useState(false)
@@ -22,7 +24,7 @@ export function usePlayer() {
   // Init audio element
   useEffect(() => {
     const audio = new Audio()
-    audio.volume = 0.8
+    audio.volume = parseFloat(localStorage.getItem('wisisleep_volume') || '0.8')
     audioRef.current = audio
 
     // Restore persisted state
@@ -112,6 +114,7 @@ export function usePlayer() {
     if (!audio) return
     audio.volume = val
     setVolumeState(val)
+    localStorage.setItem('wisisleep_volume', String(val))
   }, [])
 
   useEffect(() => { queueRef.current = queue }, [queue])

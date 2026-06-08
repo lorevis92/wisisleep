@@ -35,7 +35,10 @@ export default function Navbar({ activeTab, onTabChange }) {
         </button>
 
         {/* Logo + Name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+        <div
+          onClick={() => onTabChange('discover')}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, cursor: 'pointer' }}
+        >
           <img src="/logo-wisisleep.png" alt="WisiSleep" style={{ height: 28, width: 'auto' }} />
           <span style={{
             fontFamily: 'Syne, sans-serif', fontWeight: 800,
