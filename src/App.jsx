@@ -9,7 +9,9 @@ import { usePlayer } from './hooks/usePlayer'
 import { useLibrary } from './hooks/useLibrary'
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('discover')
+  const [activeTab, setActiveTab] = useState(
+    () => localStorage.getItem('wisisleep_tab') || 'discover'
+  )
 
   const {
     currentTrack, isPlaying, progress, duration,
@@ -25,14 +27,19 @@ export default function App() {
     else addToLibrary(track)
   }
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    localStorage.setItem('wisisleep_tab', tab)
+  }
+
   const handlePlay = (track) => {
     playTrack(track)
-    setActiveTab('player')
+    handleTabChange('player')
   }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 100 : 0 }}>
         {activeTab === 'discover' && (
@@ -91,7 +98,7 @@ export default function App() {
         onVolume={setVolume}
         onStartTimer={startTimer}
         onCancelTimer={cancelTimer}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
     </div>
   )

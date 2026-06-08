@@ -1,18 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
+const STORAGE_KEY = 'wisisleep_player'
+
 export function usePlayer() {
   const audioRef = useRef(null)
   const timerRef = useRef(null)
   const fadeRef = useRef(null)
   const queueRef = useRef([])
+  const saveIntervalRef = useRef(null)
 
   const [currentTrack, setCurrentTrack] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolumeState] = useState(0.8)
-  const [sleepTimer, setSleepTimer] = useState(0) // minutes
-  const [timeLeft, setTimeLeft] = useState(0) // seconds
+  const [sleepTimer, setSleepTimer] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(0)
   const [isFading, setIsFading] = useState(false)
   const [queue, setQueue] = useState([])
 
@@ -21,6 +24,17 @@ export function usePlayer() {
     const audio = new Audio()
     audio.volume = 0.8
     audioRef.current = audio
+
+    // Restore persisted state
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      if (saved?.trackData?.audioUrl) {
+        audio.src = saved.trackData.audioUrl
+        audio.currentTime = saved.progress || 0
+        setCurrentTrack(saved.trackData)
+        setProgress(saved.progress || 0)
+      }
+    } catch {}
 
     audio.addEventListener('timeupdate', () => {
       setProgress(audio.currentTime)
@@ -37,6 +51,7 @@ export function usePlayer() {
         audio.play().catch(e => console.warn('Play error:', e))
         setCurrentTrack(next)
         setProgress(0)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: next, progress: 0 }))
       } else {
         setIsPlaying(false)
       }
@@ -44,11 +59,25 @@ export function usePlayer() {
     audio.addEventListener('play', () => setIsPlaying(true))
     audio.addEventListener('pause', () => setIsPlaying(false))
 
+    // Save progress every 5s while playing
+    saveIntervalRef.current = setInterval(() => {
+      if (!audio.paused && audioRef.current?.src) {
+        const track = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')?.trackData
+        if (track) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            trackData: track,
+            progress: audio.currentTime,
+          }))
+        }
+      }
+    }, 5000)
+
     return () => {
       audio.pause()
       audio.src = ''
       clearInterval(timerRef.current)
       clearInterval(fadeRef.current)
+      clearInterval(saveIntervalRef.current)
     }
   }, [])
 
@@ -61,6 +90,7 @@ export function usePlayer() {
     audio.play().catch(e => console.warn('Play error:', e))
     setCurrentTrack(track)
     setProgress(0)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: track, progress: 0 }))
   }, [volume])
 
   const togglePlay = useCallback(() => {
@@ -102,7 +132,7 @@ export function usePlayer() {
     const totalSeconds = minutes * 60
     setTimeLeft(totalSeconds)
 
-    const FADE_START = 120 // start fading 2 min before end
+    const FADE_START = 120
     const originalVolume = audioRef.current?.volume || volume
 
     timerRef.current = setInterval(() => {
@@ -118,7 +148,6 @@ export function usePlayer() {
           return 0
         }
 
-        // Start fade
         if (next <= FADE_START && !isFading) {
           setIsFading(true)
         }
