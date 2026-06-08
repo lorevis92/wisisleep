@@ -3,7 +3,8 @@ const FREESOUND_KEY = (import.meta.env.VITE_FREESOUND_API_KEY || '').trim().repl
 
 export async function fetchNatureSounds(query = 'rain') {
   try {
-    const url = `https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(query)}&filter=duration:[600 TO 7200]&fields=id,name,duration,previews,username,description,tags&page_size=12&token=${FREESOUND_KEY}`
+    const filter = `duration:[60 TO 7200] avg_rating:[3.5 TO 5] num_downloads:[100 TO *]`
+    const url = `https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}&fields=id,name,duration,previews,username,description,tags,avg_rating,num_downloads&page_size=12&sort=score&token=${FREESOUND_KEY}`
     const res = await fetch(url)
     const data = await res.json()
     return (data.results || []).map(s => ({

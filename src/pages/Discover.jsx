@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { T, CATEGORIES, NATURE_TAGS, PODCAST_CATEGORIES } from '../utils/constants'
+import { T, CATEGORIES, NATURE_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
 import { fetchNatureSounds, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
 
 export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, addToQueue }) {
   const [activeCategory, setActiveCategory] = useState('nature')
+  const [activeNatureCategory, setActiveNatureCategory] = useState('rain')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
@@ -15,7 +16,6 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   const debounceRef = useRef(null)
 
   const TAGS_BY_CATEGORY = {
-    nature: NATURE_TAGS,
     'sleep-music': ['ambient', 'piano', 'meditation', 'lofi', 'binaural', 'calm', 'zen'],
     podcast: PODCAST_CATEGORIES,
     audiobook: ['nature', 'philosophy', 'history', 'science', 'adventure', 'mystery'],
@@ -25,15 +25,12 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setLoading(true)
     setResults([])
     try {
-      const term = q || (cat === 'nature' ? 'rain' : cat === 'sleep-music' ? 'relaxing' : cat === 'podcast' ? 'science' : 'nature')
+      const term = q || (cat === 'sleep-music' ? 'relaxing' : cat === 'podcast' ? 'science' : 'nature')
       let data = []
-      if (cat === 'nature') data = await fetchNatureSounds(term)
+      if (cat === 'nature') data = await fetchNatureSounds(q)
       else if (cat === 'sleep-music') data = await fetchSleepMusic(term)
       else if (cat === 'podcast') data = await fetchPodcasts(term)
-      else if (cat === 'audiobook') {
-        data = await fetchAudiobooks(term)
-        if (data.length > 0) console.log('First book sections:', data[0].sections)
-      }
+      else if (cat === 'audiobook') data = await fetchAudiobooks(term)
       setResults(data)
     } finally {
       setLoading(false)
@@ -41,12 +38,22 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   }
 
   useEffect(() => {
-    doSearch(activeCategory, '')
+    if (activeCategory === 'nature') {
+      const cat = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)
+      doSearch('nature', cat?.query || 'rain ambience relaxing loop')
+    } else {
+      doSearch(activeCategory, '')
+    }
     setQuery('')
     setActiveTag('')
     setSuggestions([])
     setShowSuggestions(false)
   }, [activeCategory])
+
+  const handleNatureCategoryClick = (cat) => {
+    setActiveNatureCategory(cat.id)
+    doSearch('nature', cat.query)
+  }
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -184,6 +191,47 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         ))}
       </div>
 
+      {/* Nature: category grid */}
+      {activeCategory === 'nature' && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="nature-grid">
+            {NATURE_CATEGORIES.map(cat => (
+              <div
+                key={cat.id}
+                onClick={() => handleNatureCategoryClick(cat)}
+                style={{
+                  height: 120, borderRadius: 6, overflow: 'hidden',
+                  position: 'relative', cursor: 'pointer',
+                  border: `2px solid ${activeNatureCategory === cat.id ? T.primary : 'transparent'}`,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <img
+                  src={cat.image} alt={cat.label}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.62))',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: 8, left: 0, right: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                  <span style={{
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                    color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em',
+                  }}>
+                    {cat.label}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search */}
       <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <div style={{ position: 'relative', flex: 1 }}>
@@ -224,32 +272,34 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
           letterSpacing: '0.05em', textTransform: 'uppercase',
           padding: '8px 16px', borderRadius: 3,
-          background: T.primary, color: '#fff', border: 'none',
+          background: T.primary, color: '#fff', border: 'none', cursor: 'pointer',
         }}>
           Search
         </button>
       </form>
 
-      {/* Quick tags */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
-        {(TAGS_BY_CATEGORY[activeCategory] || []).map(tag => (
-          <button
-            key={tag}
-            onClick={() => handleTag(tag)}
-            style={{
-              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 10,
-              letterSpacing: '0.04em', textTransform: 'uppercase',
-              padding: '4px 10px', borderRadius: 3,
-              border: `1px solid ${activeTag === tag ? T.primary : T.border}`,
-              background: activeTag === tag ? T.primaryLight : T.surface,
-              color: activeTag === tag ? T.primary : T.textMuted,
-              cursor: 'pointer', transition: 'all 0.12s',
-            }}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
+      {/* Quick tags (non-nature categories) */}
+      {activeCategory !== 'nature' && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
+          {(TAGS_BY_CATEGORY[activeCategory] || []).map(tag => (
+            <button
+              key={tag}
+              onClick={() => handleTag(tag)}
+              style={{
+                fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 10,
+                letterSpacing: '0.04em', textTransform: 'uppercase',
+                padding: '4px 10px', borderRadius: 3,
+                border: `1px solid ${activeTag === tag ? T.primary : T.border}`,
+                background: activeTag === tag ? T.primaryLight : T.surface,
+                color: activeTag === tag ? T.primary : T.textMuted,
+                cursor: 'pointer', transition: 'all 0.12s',
+              }}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Results */}
       {loading && (
@@ -283,6 +333,19 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           />
         ))}
       </div>
+
+      <style>{`
+        .nature-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+        }
+        @media (max-width: 640px) {
+          .nature-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      `}</style>
     </div>
   )
 }
