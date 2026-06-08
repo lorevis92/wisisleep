@@ -94,6 +94,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setActiveAudiobookCategory(cat.id)
     setQuery(cat.label)
     doSearch('audiobook', cat.id)
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const handleSearch = (e) => {
