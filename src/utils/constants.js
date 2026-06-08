@@ -42,6 +42,19 @@ export const NATURE_CATEGORIES = [
   { id: 'wind', label: 'Wind', icon: '💨', query: 'wind nature outdoor relaxing ambience', image: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&q=80' },
 ]
 
+export const AUDIOBOOK_CATEGORIES = [
+  { id: 'mystery', label: 'Mystery', icon: '🔍', image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=80' },
+  { id: 'philosophy', label: 'Philosophy', icon: '🧠', image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&q=80' },
+  { id: 'history', label: 'History', icon: '🏛', image: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=400&q=80' },
+  { id: 'science', label: 'Science', icon: '🔬', image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=400&q=80' },
+  { id: 'adventure', label: 'Adventure', icon: '⚔️', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80' },
+  { id: 'nature', label: 'Nature', icon: '🌿', image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80' },
+  { id: 'classic', label: 'Classic', icon: '📖', image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400&q=80' },
+  { id: 'romance', label: 'Romance', icon: '❤️', image: 'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&q=80' },
+  { id: 'scifi', label: 'Sci-Fi', icon: '🚀', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80' },
+  { id: 'biography', label: 'Biography', icon: '👤', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&q=80' },
+]
+
 export const SLEEP_MUSIC_CATEGORIES = [
   { id: 'ambient', label: 'Ambient', icon: '🌫️', image: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&q=80' },
   { id: 'piano', label: 'Piano', icon: '🎹', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=400&q=80' },

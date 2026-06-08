@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { T, CATEGORIES, NATURE_CATEGORIES, SLEEP_MUSIC_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
+import { T, CATEGORIES, NATURE_CATEGORIES, SLEEP_MUSIC_CATEGORIES, AUDIOBOOK_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
 import { fetchNatureSounds, fetchNatureSoundsFromDB, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
 
@@ -7,6 +7,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   const [activeCategory, setActiveCategory] = useState('nature')
   const [activeNatureCategory, setActiveNatureCategory] = useState(null)
   const [activeSleepCategory, setActiveSleepCategory] = useState(null)
+  const [activeAudiobookCategory, setActiveAudiobookCategory] = useState(null)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [natureLoading, setNatureLoading] = useState(false)
@@ -69,6 +70,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setShowSuggestions(false)
     if (activeCategory !== 'nature') setActiveNatureCategory(null)
     if (activeCategory !== 'sleep-music') setActiveSleepCategory(null)
+    if (activeCategory !== 'audiobook') setActiveAudiobookCategory(null)
   }, [activeCategory])
 
   const handleNatureCategoryClick = (cat) => {
@@ -86,6 +88,12 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
       })
       .finally(() => setNatureLoading(false))
+  }
+
+  const handleAudiobookCategoryClick = (cat) => {
+    setActiveAudiobookCategory(cat.id)
+    setQuery(cat.label)
+    doSearch('audiobook', cat.id)
   }
 
   const handleSearch = (e) => {
@@ -242,6 +250,47 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
                   height: 120, borderRadius: 6, overflow: 'hidden',
                   position: 'relative', cursor: 'pointer',
                   border: `2px solid ${activeNatureCategory === cat.id ? T.primary : 'transparent'}`,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <img
+                  src={cat.image} alt={cat.label}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.62))',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: 8, left: 0, right: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                  <span style={{
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                    color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em',
+                  }}>
+                    {cat.label}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Audiobook: category grid */}
+      {activeCategory === 'audiobook' && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="nature-grid">
+            {AUDIOBOOK_CATEGORIES.map(cat => (
+              <div
+                key={cat.id}
+                onClick={() => handleAudiobookCategoryClick(cat)}
+                style={{
+                  height: 120, borderRadius: 6, overflow: 'hidden',
+                  position: 'relative', cursor: 'pointer',
+                  border: `2px solid ${activeAudiobookCategory === cat.id ? T.primary : 'transparent'}`,
                   boxSizing: 'border-box',
                 }}
               >
