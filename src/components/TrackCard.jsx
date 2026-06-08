@@ -100,11 +100,11 @@ export default function TrackCard({ track, onPlay, onSave, isSaved, isActive, is
           {isLoading ? '...' : TYPE_LABELS[track.type]}
         </span>
 
-        {track.type !== 'sounds' && (track.totalDuration > 0 || track.duration > 0) && (
+        {track.type === 'music' && track.duration > 0 && (
           <span style={{
             fontFamily: 'DM Mono, monospace', fontSize: 11, color: T.textMuted,
           }}>
-            {formatDuration(track.totalDuration > 0 ? track.totalDuration : track.duration)}
+            {formatDuration(track.duration)}
           </span>
         )}
 
