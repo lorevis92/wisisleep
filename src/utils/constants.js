@@ -30,7 +30,7 @@ export const TIMER_OPTIONS = [
 ]
 
 export const NATURE_CATEGORIES = [
-  { id: 'rain', label: 'Rain', icon: '🌧', query: 'rain ambience relaxing loop', image: 'https://images.unsplash.com/photo-1515694346937-94d85e41e93b?w=400&q=80' },
+  { id: 'rain', label: 'Rain', icon: '🌧', query: 'rain ambience relaxing loop', image: 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=400&q=80' },
   { id: 'ocean', label: 'Ocean', icon: '🌊', query: 'ocean waves beach relaxing', image: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&q=80' },
   { id: 'forest', label: 'Forest', icon: '🌲', query: 'forest night birds nature ambience', image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80' },
   { id: 'fireplace', label: 'Fireplace', icon: '🔥', query: 'fireplace crackling fire indoor', image: 'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=400&q=80' },

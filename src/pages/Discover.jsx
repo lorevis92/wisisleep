@@ -8,6 +8,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   const [activeNatureCategory, setActiveNatureCategory] = useState('rain')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [natureLoading, setNatureLoading] = useState(false)
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState('')
   const [loadingEpisode, setLoadingEpisode] = useState(null)
@@ -37,10 +38,18 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     }
   }
 
+  const loadNatureSounds = (query) => {
+    setNatureLoading(true)
+    setResults([])
+    fetchNatureSounds(query)
+      .then(data => setResults(data))
+      .finally(() => setNatureLoading(false))
+  }
+
   useEffect(() => {
     if (activeCategory === 'nature') {
       const cat = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)
-      doSearch('nature', cat?.query || 'rain ambience relaxing loop')
+      loadNatureSounds(cat?.query || 'rain ambience relaxing loop')
     } else {
       doSearch(activeCategory, '')
     }
@@ -52,7 +61,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
 
   const handleNatureCategoryClick = (cat) => {
     setActiveNatureCategory(cat.id)
-    doSearch('nature', cat.query)
+    loadNatureSounds(cat.query)
   }
 
   const handleSearch = (e) => {
@@ -301,8 +310,18 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         </div>
       )}
 
-      {/* Results */}
-      {loading && (
+      {/* Nature loading */}
+      {activeCategory === 'nature' && natureLoading && (
+        <div style={{
+          textAlign: 'center', padding: '24px 0',
+          fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
+        }}>
+          Loading {NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)?.label} sounds...
+        </div>
+      )}
+
+      {/* General loading (non-nature) */}
+      {loading && activeCategory !== 'nature' && (
         <div style={{
           textAlign: 'center', padding: '48px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
@@ -311,12 +330,21 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         </div>
       )}
 
-      {!loading && results.length === 0 && (
+      {/* No results */}
+      {!loading && !natureLoading && results.length === 0 && activeCategory !== 'nature' && (
         <div style={{
           textAlign: 'center', padding: '48px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
         }}>
           No results found. Try a different search.
+        </div>
+      )}
+      {!loading && !natureLoading && results.length === 0 && activeCategory === 'nature' && (
+        <div style={{
+          textAlign: 'center', padding: '16px 0',
+          fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
+        }}>
+          No sounds found for this category.
         </div>
       )}
 
