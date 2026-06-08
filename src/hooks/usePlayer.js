@@ -1,6 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
 const STORAGE_KEY = 'wisisleep_player'
+const HISTORY_KEY = 'wisisleep_history'
+
+export function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function saveToHistory(track) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+    const deduped = prev.filter(t => t.id !== track.id)
+    localStorage.setItem(HISTORY_KEY, JSON.stringify([track, ...deduped].slice(0, 20)))
+  } catch {}
+}
 
 export function usePlayer() {
   const audioRef = useRef(null)
@@ -94,6 +111,7 @@ export function usePlayer() {
     setCurrentTrack(track)
     setProgress(0)
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: track, progress: 0 }))
+    saveToHistory(track)
   }, [volume])
 
   const togglePlay = useCallback(() => {
