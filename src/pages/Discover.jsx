@@ -366,6 +366,57 @@ function SectionTitle({ children }) {
   )
 }
 
+// ─── Recommendation logic ────────────────────────────────────────────────────
+function analyzeHistory(history) {
+  if (history.length < 3) return null
+  const typeCounts = {}
+  history.forEach(t => { typeCounts[t.type] = (typeCounts[t.type] || 0) + 1 })
+  const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0]
+  if (!topType) return null
+  const ofType = history.filter(t => t.type === topType)
+  if (topType === 'audiobook') {
+    const genres = ['mystery', 'adventure', 'history', 'philosophy', 'science']
+    const counts = {}
+    ofType.forEach(t => {
+      const text = ((t.description || '') + ' ' + (t.title || '')).toLowerCase()
+      genres.forEach(g => { if (text.includes(g)) counts[g] = (counts[g] || 0) + 1 })
+    })
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'mystery'
+    return { type: 'audiobook', subtype: top }
+  }
+  if (topType === 'music') {
+    const counts = {}
+    ofType.forEach(t => { if (t.subcategory) counts[t.subcategory] = (counts[t.subcategory] || 0) + 1 })
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'ambient'
+    return { type: 'music', subtype: top }
+  }
+  if (topType === 'sounds') {
+    const counts = {}
+    ofType.forEach(t => { if (t.category) counts[t.category] = (counts[t.category] || 0) + 1 })
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'rain'
+    return { type: 'sounds', subtype: top }
+  }
+  if (topType === 'podcast') return { type: 'podcast', subtype: 'sleep meditation' }
+  return null
+}
+
+async function fetchRecommended(analysis) {
+  if (!analysis) {
+    const [nature, music, books] = await Promise.all([
+      fetchNatureSoundsFromDB('rain').then(d => d.slice(0, 3)),
+      fetchNatureSoundsFromDB('sleep-music', 'ambient').then(d => d.slice(0, 3)),
+      fetchAudiobooks('mystery').then(d => d.slice(0, 4)),
+    ])
+    return { tracks: [...nature, ...music, ...books], label: 'Popular' }
+  }
+  let tracks = []
+  if (analysis.type === 'audiobook') tracks = await fetchAudiobooks(analysis.subtype)
+  else if (analysis.type === 'music') tracks = await fetchNatureSoundsFromDB('sleep-music', analysis.subtype)
+  else if (analysis.type === 'sounds') tracks = await fetchNatureSoundsFromDB(analysis.subtype)
+  else if (analysis.type === 'podcast') tracks = await fetchPodcasts(analysis.subtype)
+  return { tracks: tracks.slice(0, 10), label: 'Recommended for You' }
+}
+
 // ─── Main Discover ────────────────────────────────────────────────────────────
 export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue, activeSection, onSectionConsumed }) {
   const [activeView, setActiveView] = useState(null) // null | 'nature' | 'sleep-music' | 'audiobooks' | 'podcasts'
@@ -374,6 +425,9 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
   const [musicTracks, setMusicTracks] = useState([])
   const [bookTracks, setBookTracks] = useState([])
   const [podcastTracks, setPodcastTracks] = useState([])
+  const [recommendedTracks, setRecommendedTracks] = useState([])
+  const [recommendedLabel, setRecommendedLabel] = useState('Popular')
+  const [loadingRecommended, setLoadingRecommended] = useState(true)
   const [loadingNature, setLoadingNature] = useState(true)
   const [loadingMusic, setLoadingMusic] = useState(true)
   const [loadingBooks, setLoadingBooks] = useState(true)
@@ -388,7 +442,13 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
   }, [activeSection])
 
   useEffect(() => {
-    setContinueItems(getHistory())
+    const history = getHistory()
+    setContinueItems(history)
+
+    const analysis = analyzeHistory(history)
+    fetchRecommended(analysis)
+      .then(({ tracks, label }) => { setRecommendedTracks(tracks); setRecommendedLabel(label) })
+      .finally(() => setLoadingRecommended(false))
 
     fetchNatureSoundsFromDB('rain')
       .then(d => setNatureTracks(d.slice(0, 10)))
@@ -513,6 +573,8 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
         <Section title="Continue Listening" items={continueItems} loading={false}
           onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId} />
       )}
+      <Section title={recommendedLabel} items={recommendedTracks} loading={loadingRecommended}
+        onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId} />
       <Section title="Nature Sounds" id="nature-sounds" items={natureTracks} loading={loadingNature}
         onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId}
         onSeeAll={() => setActiveView('nature')} />
