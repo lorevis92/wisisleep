@@ -37,9 +37,24 @@ export default function App() {
     handleTabChange('player')
   }
 
+  const handleGoodnightMode = async () => {
+    try {
+      const res = await fetch('/api/nature-sounds?category=rain')
+      const data = await res.json()
+      const sounds = Array.isArray(data) ? data : []
+      if (sounds.length > 0) {
+        const random = sounds[Math.floor(Math.random() * sounds.length)]
+        playTrack(random)
+        startTimer(30)
+      }
+    } catch (e) {
+      console.error('Goodnight mode error:', e)
+    }
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} onGoodnightMode={handleGoodnightMode} />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 100 : 0 }}>
         {activeTab === 'discover' && (
