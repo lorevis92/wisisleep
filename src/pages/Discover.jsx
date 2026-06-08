@@ -46,7 +46,8 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     fetchNatureSounds(query)
       .then(data => {
         console.log('Results:', data)
-        setResults(data)
+        const catImage = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)?.image || null
+        setResults(data.map(sound => ({ ...sound, coverUrl: catImage })))
         setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
       })
       .finally(() => setNatureLoading(false))
