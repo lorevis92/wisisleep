@@ -76,6 +76,7 @@ export default function App() {
         onTabChange={handleTabChange}
         onGoodnightMode={handleGoodnightMode}
         onNavigate={handleNavigate}
+        onHome={() => setActiveTab('discover')}
       />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 100 : 0 }}>

@@ -16,7 +16,7 @@ const MENU_ITEMS = [
   { id: 'goodnight', label: 'Goodnight Mode', icon: '🌙' },
 ]
 
-export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavigate }) {
+export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavigate, onHome }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -102,7 +102,7 @@ export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavi
 
         {/* Logo */}
         <div
-          onClick={() => onTabChange('discover')}
+          onClick={() => onHome?.()}
           style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, cursor: 'pointer' }}
         >
           <img

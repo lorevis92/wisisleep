@@ -14,8 +14,15 @@ export function getHistory() {
 function saveToHistory(track) {
   try {
     const prev = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
-    const deduped = prev.filter(t => t.id !== track.id)
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([track, ...deduped].slice(0, 20)))
+    const baseId = track.id.split('-ch')[0]
+    const recentBaseId = prev[0]?.id?.split('-ch')[0]
+    let updated
+    if (recentBaseId && recentBaseId === baseId) {
+      updated = [track, ...prev.slice(1)]
+    } else {
+      updated = [track, ...prev.filter(t => t.id !== track.id)].slice(0, 20)
+    }
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated))
   } catch {}
 }
 
