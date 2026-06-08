@@ -5,7 +5,7 @@ import TrackCard from '../components/TrackCard'
 
 export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, addToQueue }) {
   const [activeCategory, setActiveCategory] = useState('nature')
-  const [activeNatureCategory, setActiveNatureCategory] = useState('rain')
+  const [activeNatureCategory, setActiveNatureCategory] = useState(null)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [natureLoading, setNatureLoading] = useState(false)
@@ -60,8 +60,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
 
   useEffect(() => {
     if (activeCategory === 'nature') {
-      const cat = NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)
-      loadNatureSounds(cat?.id || 'rain', cat?.query || 'rain ambience relaxing loop')
+      setResults([])
     } else {
       doSearch(activeCategory, '')
     }
@@ -69,6 +68,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setActiveTag('')
     setSuggestions([])
     setShowSuggestions(false)
+    if (activeCategory !== 'nature') setActiveNatureCategory(null)
   }, [activeCategory])
 
   const handleNatureCategoryClick = (cat) => {
