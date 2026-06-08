@@ -4,10 +4,11 @@ const SUPABASE_URL = 'https://eqxuzkchjpbadxvgbqpf.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxeHV6a2NoanBiYWR4dmdicXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMDY5NDUsImV4cCI6MjA5NDg4Mjk0NX0.gc-Iy1nkz68mGAaorqjzDYkOxlLijUJDGzK_XoNa7i8'
 
 export default async function handler(req, res) {
-  const { category } = req.query
+  const { category, subcategory } = req.query
   if (!category) return res.status(200).json([])
   try {
-    const url = `${SUPABASE_URL}/rest/v1/nature_sounds?category=eq.${encodeURIComponent(category)}&active=eq.true&limit=20&select=id,title,audio_url,image_url,category`
+    let url = `${SUPABASE_URL}/rest/v1/nature_sounds?category=eq.${encodeURIComponent(category)}&active=eq.true&limit=20&select=id,title,audio_url,image_url,category,subcategory`
+    if (subcategory) url += `&subcategory=eq.${encodeURIComponent(subcategory)}`
     const response = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,

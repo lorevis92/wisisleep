@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { T, CATEGORIES, NATURE_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
+import { T, CATEGORIES, NATURE_CATEGORIES, SLEEP_MUSIC_CATEGORIES, PODCAST_CATEGORIES } from '../utils/constants'
 import { fetchNatureSounds, fetchNatureSoundsFromDB, fetchSleepMusic, fetchPodcasts, fetchAudiobooks, fetchPodcastEpisodes } from '../utils/api'
 import TrackCard from '../components/TrackCard'
 
 export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, addToQueue }) {
   const [activeCategory, setActiveCategory] = useState('nature')
   const [activeNatureCategory, setActiveNatureCategory] = useState(null)
+  const [activeSleepCategory, setActiveSleepCategory] = useState(null)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [natureLoading, setNatureLoading] = useState(false)
@@ -57,7 +58,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   }
 
   useEffect(() => {
-    if (activeCategory === 'nature') {
+    if (activeCategory === 'nature' || activeCategory === 'sleep-music') {
       setResults([])
     } else {
       doSearch(activeCategory, '')
@@ -67,11 +68,24 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setSuggestions([])
     setShowSuggestions(false)
     if (activeCategory !== 'nature') setActiveNatureCategory(null)
+    if (activeCategory !== 'sleep-music') setActiveSleepCategory(null)
   }, [activeCategory])
 
   const handleNatureCategoryClick = (cat) => {
     setActiveNatureCategory(cat.id)
     loadNatureSounds(cat.id, cat.query)
+  }
+
+  const handleSleepCategoryClick = (cat) => {
+    setActiveSleepCategory(cat.id)
+    setNatureLoading(true)
+    setResults([])
+    fetchNatureSoundsFromDB('sleep-music', cat.id)
+      .then(data => {
+        setResults(data)
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+      })
+      .finally(() => setNatureLoading(false))
   }
 
   const handleSearch = (e) => {
@@ -250,6 +264,47 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         </div>
       )}
 
+      {/* Sleep Music: subcategory grid */}
+      {activeCategory === 'sleep-music' && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="nature-grid">
+            {SLEEP_MUSIC_CATEGORIES.map(cat => (
+              <div
+                key={cat.id}
+                onClick={() => handleSleepCategoryClick(cat)}
+                style={{
+                  height: 120, borderRadius: 6, overflow: 'hidden',
+                  position: 'relative', cursor: 'pointer',
+                  border: `2px solid ${activeSleepCategory === cat.id ? T.primary : 'transparent'}`,
+                  boxSizing: 'border-box',
+                }}
+              >
+                <img
+                  src={cat.image} alt={cat.label}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.62))',
+                }} />
+                <div style={{
+                  position: 'absolute', bottom: 8, left: 0, right: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                }}>
+                  <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                  <span style={{
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                    color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em',
+                  }}>
+                    {cat.label}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search */}
       <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <div style={{ position: 'relative', flex: 1 }}>
@@ -319,18 +374,21 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         </div>
       )}
 
-      {/* Nature loading */}
-      {activeCategory === 'nature' && natureLoading && (
+      {/* Nature / Sleep Music loading */}
+      {(activeCategory === 'nature' || activeCategory === 'sleep-music') && natureLoading && (
         <div style={{
           textAlign: 'center', padding: '24px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
         }}>
-          Loading {NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)?.label} sounds...
+          {activeCategory === 'nature'
+            ? `Loading ${NATURE_CATEGORIES.find(c => c.id === activeNatureCategory)?.label} sounds...`
+            : `Loading ${SLEEP_MUSIC_CATEGORIES.find(c => c.id === activeSleepCategory)?.label}...`
+          }
         </div>
       )}
 
-      {/* General loading (non-nature) */}
-      {loading && activeCategory !== 'nature' && (
+      {/* General loading (non-nature, non-sleep-music) */}
+      {loading && activeCategory !== 'nature' && activeCategory !== 'sleep-music' && (
         <div style={{
           textAlign: 'center', padding: '48px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
@@ -340,7 +398,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
       )}
 
       {/* No results */}
-      {!loading && !natureLoading && results.length === 0 && activeCategory !== 'nature' && (
+      {!loading && !natureLoading && results.length === 0 && activeCategory !== 'nature' && activeCategory !== 'sleep-music' && (
         <div style={{
           textAlign: 'center', padding: '48px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
@@ -348,12 +406,12 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
           No results found. Try a different search.
         </div>
       )}
-      {!loading && !natureLoading && results.length === 0 && activeCategory === 'nature' && (
+      {!loading && !natureLoading && results.length === 0 && (activeCategory === 'nature' || activeCategory === 'sleep-music') && (activeNatureCategory || activeSleepCategory) && (
         <div style={{
           textAlign: 'center', padding: '16px 0',
           fontFamily: 'Syne, sans-serif', fontSize: 13, color: T.textMuted,
         }}>
-          No sounds found for this category.
+          No tracks found for this category.
         </div>
       )}
 

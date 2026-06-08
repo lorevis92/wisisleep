@@ -23,9 +23,11 @@ export async function fetchNatureSounds(query = 'rain') {
   }
 }
 
-export async function fetchNatureSoundsFromDB(category) {
+export async function fetchNatureSoundsFromDB(category, subcategory = null) {
   try {
-    const res = await fetch(`/api/nature-sounds?category=${encodeURIComponent(category)}`)
+    let url = `/api/nature-sounds?category=${encodeURIComponent(category)}`
+    if (subcategory) url += `&subcategory=${encodeURIComponent(subcategory)}`
+    const res = await fetch(url)
     const data = await res.json()
     return Array.isArray(data) ? data : []
   } catch (e) {

@@ -42,6 +42,16 @@ export const NATURE_CATEGORIES = [
   { id: 'wind', label: 'Wind', icon: '💨', query: 'wind nature outdoor relaxing ambience', image: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&q=80' },
 ]
 
+export const SLEEP_MUSIC_CATEGORIES = [
+  { id: 'ambient', label: 'Ambient', icon: '🌫️', image: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&q=80' },
+  { id: 'piano', label: 'Piano', icon: '🎹', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=400&q=80' },
+  { id: 'meditation', label: 'Meditation', icon: '🧘', image: 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=400&q=80' },
+  { id: 'lofi', label: 'Lo-Fi', icon: '🎧', image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80' },
+  { id: 'binaural', label: 'Binaural', icon: '〰️', image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80' },
+  { id: 'calm', label: 'Calm', icon: '✨', image: 'https://images.unsplash.com/photo-1459233313842-cd392ee2c388?w=400&q=80' },
+  { id: 'zen', label: 'Zen', icon: '☯️', image: 'https://images.unsplash.com/photo-1481671703460-040cb8a2d909?w=400&q=80' },
+]
+
 export const PODCAST_CATEGORIES = [
   'science', 'history', 'philosophy', 'technology', 'nature', 'space', 'psychology', 'culture'
 ]
