@@ -33,6 +33,7 @@ export default function App() {
   }
 
   const [activeSection, setActiveSection] = useState(null)
+  const [discoverResetKey, setDiscoverResetKey] = useState(0)
 
   const handlePlay = (track) => {
     playTrack(track)
@@ -76,7 +77,10 @@ export default function App() {
         onTabChange={handleTabChange}
         onGoodnightMode={handleGoodnightMode}
         onNavigate={handleNavigate}
-        onHome={() => setActiveTab('discover')}
+        onHome={() => {
+          if (activeTab === 'discover') setDiscoverResetKey(k => k + 1)
+          else setActiveTab('discover')
+        }}
       />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 100 : 0 }}>
@@ -89,6 +93,7 @@ export default function App() {
             addToQueue={addToQueue}
             activeSection={activeSection}
             onSectionConsumed={() => setActiveSection(null)}
+            resetKey={discoverResetKey}
           />
         )}
         {activeTab === 'player' && (

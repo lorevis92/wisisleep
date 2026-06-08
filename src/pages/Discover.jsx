@@ -418,7 +418,7 @@ async function fetchRecommended(analysis) {
 }
 
 // ─── Main Discover ────────────────────────────────────────────────────────────
-export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue, activeSection, onSectionConsumed }) {
+export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue, activeSection, onSectionConsumed, resetKey }) {
   const [activeView, setActiveView] = useState(null) // null | 'nature' | 'sleep-music' | 'audiobooks' | 'podcasts'
   const [continueItems, setContinueItems] = useState([])
   const [natureTracks, setNatureTracks] = useState([])
@@ -440,6 +440,10 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
       onSectionConsumed?.()
     }
   }, [activeSection])
+
+  useEffect(() => {
+    if (resetKey > 0) setActiveView(null)
+  }, [resetKey])
 
   useEffect(() => {
     const history = getHistory()
