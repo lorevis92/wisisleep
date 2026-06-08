@@ -1,5 +1,5 @@
 // ─── Freesound API (Nature Sounds) ───────────────────────────────────────────
-const FREESOUND_KEY = import.meta.env.VITE_FREESOUND_API_KEY
+const FREESOUND_KEY = (import.meta.env.VITE_FREESOUND_API_KEY || '').trim().replace(/[^\x20-\x7E]/g, '')
 
 export async function fetchNatureSounds(query = 'rain') {
   try {
