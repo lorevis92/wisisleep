@@ -89,6 +89,7 @@ export function usePlayer() {
 
     audio.src = track.audioUrl
     audio.volume = volume
+    audio.loop = track.type === 'sounds'
     audio.play().catch(e => console.warn('Play error:', e))
     setCurrentTrack(track)
     setProgress(0)

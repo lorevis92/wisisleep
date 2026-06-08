@@ -15,6 +15,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const debounceRef = useRef(null)
+  const resultsRef = useRef(null)
 
   const TAGS_BY_CATEGORY = {
     'sleep-music': ['ambient', 'piano', 'meditation', 'lofi', 'binaural', 'calm', 'zen'],
@@ -43,7 +44,11 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
     setNatureLoading(true)
     setResults([])
     fetchNatureSounds(query)
-      .then(data => { console.log('Results:', data); setResults(data) })
+      .then(data => {
+        console.log('Results:', data)
+        setResults(data)
+        setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+      })
       .finally(() => setNatureLoading(false))
   }
 
@@ -350,7 +355,7 @@ export default function Discover({ onPlay, currentTrack, onSave, isInLibrary, ad
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div ref={resultsRef} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {results.map(track => (
           <TrackCard
             key={track.id}
