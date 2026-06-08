@@ -408,6 +408,11 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
   }, [])
 
   const handlePlay = async (track) => {
+    if (track.audioUrl) {
+      onPlayProp(track)
+      return
+    }
+
     if (track.type === 'audiobook') {
       setLoadingId(track.id)
       try {
@@ -423,7 +428,7 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
           coverUrl = data.coverUrl || coverUrl
         }
         if (!Array.isArray(sections) || sections.length === 0 || !sections[0]?.audioUrl) {
-          alert('No audio available for this book')
+          console.warn('No audio available for this book:', track.title)
           return
         }
         const allChapters = sections.map((s, i) => ({
@@ -441,7 +446,6 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
         sections.slice(1).forEach((_, i) => addToQueue(allChapters[i + 1]))
       } catch (e) {
         console.error('Failed to load chapters:', e)
-        alert('Failed to load chapters')
       } finally {
         setLoadingId(null)
       }
