@@ -623,6 +623,7 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
         </div>
       </div>
 
+      <div style={{ background: 'red', height: 20 }} />
       <Styles />
     </div>
   )
