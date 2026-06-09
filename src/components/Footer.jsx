@@ -5,7 +5,7 @@ export default function Footer() {
     <footer style={{
       borderTop: `1px solid ${T.border}`,
       background: T.surface,
-      padding: '20px',
+      padding: '16px 20px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',

@@ -77,7 +77,7 @@ export default function App() {
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -89,7 +89,7 @@ export default function App() {
         }}
       />
 
-      <main>
+      <main style={{ flex: 1, paddingBottom: currentTrack ? 80 : 0 }}>
         {activeTab === 'discover' && (
           <Discover
             onPlay={handlePlay}
@@ -134,7 +134,7 @@ export default function App() {
         )}
       </main>
 
-      {!currentTrack && <Footer />}
+      <Footer />
 
       <AudioPlayer
         currentTrack={currentTrack}
