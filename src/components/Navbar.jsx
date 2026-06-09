@@ -1,6 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
 import { T } from '../utils/constants'
 
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setPrompt(e) }
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', () => { setPrompt(null); setInstalled(true) })
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const install = async () => {
+    if (!prompt) return
+    prompt.prompt()
+    const { outcome } = await prompt.userChoice
+    if (outcome === 'accepted') { setPrompt(null); setInstalled(true) }
+  }
+
+  return { canInstall: !!prompt, install, installed }
+}
+
 const tabs = [
   { id: 'discover', label: 'DISCOVER' },
   { id: 'player', label: 'PLAYER' },
@@ -20,6 +41,16 @@ const MENU_ITEMS = [
 export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavigate, onHome }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const { canInstall, install, installed } = useInstallPrompt()
+  const [showInstalled, setShowInstalled] = useState(false)
+
+  useEffect(() => {
+    if (installed) {
+      setShowInstalled(true)
+      const t = setTimeout(() => setShowInstalled(false), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [installed])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -104,7 +135,7 @@ export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavi
         {/* Logo */}
         <div
           onClick={() => onHome?.()}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, cursor: 'pointer' }}
         >
           <img
             src="/logo-wisi.png"
@@ -120,8 +151,35 @@ export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavi
           </span>
         </div>
 
+        {/* Install button — mobile only */}
+        {(canInstall || showInstalled) && (
+          <div className="mobile-install">
+            {showInstalled ? (
+              <span style={{
+                fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                color: T.green, letterSpacing: '0.04em',
+              }}>
+                ✓ Installed!
+              </span>
+            ) : (
+              <button
+                onClick={install}
+                style={{
+                  fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                  letterSpacing: '0.05em', textTransform: 'uppercase',
+                  border: `1px solid ${T.border}`, borderRadius: 3,
+                  padding: '6px 12px', background: T.bg,
+                  color: T.textSecondary, cursor: 'pointer',
+                }}
+              >
+                Install
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Tabs — desktop */}
-        <div style={{ display: 'flex', gap: 4 }} className="desktop-tabs">
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} className="desktop-tabs">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -139,6 +197,28 @@ export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavi
               {tab.label}
             </button>
           ))}
+          {showInstalled && (
+            <span style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+              color: T.green, letterSpacing: '0.04em',
+            }}>
+              ✓ Installed!
+            </span>
+          )}
+          {canInstall && !showInstalled && (
+            <button
+              onClick={install}
+              style={{
+                fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+                letterSpacing: '0.05em', textTransform: 'uppercase',
+                border: `1px solid ${T.border}`, borderRadius: 3,
+                padding: '6px 12px', background: T.bg,
+                color: T.textSecondary, cursor: 'pointer',
+              }}
+            >
+              Install App
+            </button>
+          )}
         </div>
       </div>
 
@@ -172,6 +252,10 @@ export default function Navbar({ activeTab, onTabChange, onGoodnightMode, onNavi
         @media (max-width: 640px) {
           .desktop-tabs { display: none !important; }
           .mobile-tabs { display: flex !important; }
+          .mobile-install { display: flex !important; }
+        }
+        @media (min-width: 641px) {
+          .mobile-install { display: none !important; }
         }
       `}</style>
     </nav>
