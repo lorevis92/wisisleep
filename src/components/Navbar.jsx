@@ -13,6 +13,7 @@ const MENU_ITEMS = [
   { id: 'audiobooks', label: 'Audiobooks', icon: '📚' },
   { id: 'podcasts', label: 'Podcasts', icon: '🎙️' },
   { type: 'divider' },
+  { id: 'sleep-stats', label: 'Sleep Stats', icon: '😴' },
   { id: 'goodnight', label: 'Goodnight Mode', icon: '🌙' },
 ]
 

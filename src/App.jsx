@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import AudioPlayer from './components/AudioPlayer'
 import Discover from './pages/Discover'
 import Player from './pages/Player'
 import Library from './pages/Library'
+import SleepStats from './pages/SleepStats'
 import { usePlayer } from './hooks/usePlayer'
 import { useLibrary } from './hooks/useLibrary'
+import { useSleepTracker } from './hooks/useSleepTracker'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(
@@ -21,6 +23,13 @@ export default function App() {
   } = usePlayer()
 
   const { library, addToLibrary, removeFromLibrary, isInLibrary, clearLibrary } = useLibrary()
+  const { startSession, endSession } = useSleepTracker()
+
+  const prevSleepTimerRef = useRef(sleepTimer)
+  useEffect(() => {
+    if (prevSleepTimerRef.current > 0 && sleepTimer === 0) endSession()
+    prevSleepTimerRef.current = sleepTimer
+  }, [sleepTimer])
 
   const handleSave = (track) => {
     if (isInLibrary(track.id)) removeFromLibrary(track.id)
@@ -40,6 +49,7 @@ export default function App() {
     setPreviousTab(activeTab)
     playTrack(track)
     handleTabChange('player')
+    startSession(track.title)
   }
 
   const handleRestartBook = (chapters) => {
@@ -92,48 +102,54 @@ export default function App() {
       />
 
       <main style={{ flex: 1, paddingBottom: currentTrack ? 80 : 0 }}>
-        {activeTab === 'discover' && (
-          <Discover
-            onPlay={handlePlay}
-            currentTrack={currentTrack}
-            onSave={handleSave}
-            isInLibrary={isInLibrary}
-            addToQueue={addToQueue}
-            activeSection={activeSection}
-            onSectionConsumed={() => setActiveSection(null)}
-            resetKey={discoverResetKey}
-          />
-        )}
-        {activeTab === 'player' && (
-          <Player
-            currentTrack={currentTrack}
-            isPlaying={isPlaying}
-            progress={progress}
-            duration={duration}
-            volume={volume}
-            sleepTimer={sleepTimer}
-            timeLeft={timeLeft}
-            isFading={isFading}
-            onTogglePlay={togglePlay}
-            onSeek={seek}
-            onVolume={setVolume}
-            onStartTimer={startTimer}
-            onCancelTimer={cancelTimer}
-            onPlay={handlePlay}
-            onChapterPlay={handlePlay}
-            onRestartBook={handleRestartBook}
-            onBack={() => handleTabChange(previousTab)}
-          />
-        )}
-        {activeTab === 'library' && (
-          <Library
-            library={library}
-            onPlay={handlePlay}
-            currentTrack={currentTrack}
-            onSave={handleSave}
-            isInLibrary={isInLibrary}
-            onClear={clearLibrary}
-          />
+        {activeSection === 'sleep-stats' ? (
+          <SleepStats onBack={() => setActiveSection(null)} />
+        ) : (
+          <>
+            {activeTab === 'discover' && (
+              <Discover
+                onPlay={handlePlay}
+                currentTrack={currentTrack}
+                onSave={handleSave}
+                isInLibrary={isInLibrary}
+                addToQueue={addToQueue}
+                activeSection={activeSection}
+                onSectionConsumed={() => setActiveSection(null)}
+                resetKey={discoverResetKey}
+              />
+            )}
+            {activeTab === 'player' && (
+              <Player
+                currentTrack={currentTrack}
+                isPlaying={isPlaying}
+                progress={progress}
+                duration={duration}
+                volume={volume}
+                sleepTimer={sleepTimer}
+                timeLeft={timeLeft}
+                isFading={isFading}
+                onTogglePlay={togglePlay}
+                onSeek={seek}
+                onVolume={setVolume}
+                onStartTimer={startTimer}
+                onCancelTimer={cancelTimer}
+                onPlay={handlePlay}
+                onChapterPlay={handlePlay}
+                onRestartBook={handleRestartBook}
+                onBack={() => handleTabChange(previousTab)}
+              />
+            )}
+            {activeTab === 'library' && (
+              <Library
+                library={library}
+                onPlay={handlePlay}
+                currentTrack={currentTrack}
+                onSave={handleSave}
+                isInLibrary={isInLibrary}
+                onClear={clearLibrary}
+              />
+            )}
+          </>
         )}
       </main>
 
