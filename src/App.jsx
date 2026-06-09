@@ -89,7 +89,7 @@ export default function App() {
         }}
       />
 
-      <main style={{ paddingBottom: currentTrack ? 95 : 20 }}>
+      <main style={{ paddingBottom: currentTrack ? 120 : 40 }}>
         {activeTab === 'discover' && (
           <Discover
             onPlay={handlePlay}
