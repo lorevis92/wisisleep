@@ -507,7 +507,7 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
           description: track.description,
         }))
         onPlayProp({ ...allChapters[0], allChapters })
-        sections.slice(1).forEach((_, i) => addToQueue(allChapters[i + 1]))
+        sections.slice(1).forEach((_, i) => addToQueue({ ...allChapters[i + 1], allChapters }))
       } catch (e) {
         console.error('Failed to load chapters:', e)
       } finally {
