@@ -236,7 +236,7 @@ function AudiobooksSeeAll({ onBack, onPlay, currentTrack, loadingId }) {
     setLoading(true)
     setResults([])
     try {
-      const data = await fetchAudiobooks(cat.id)
+      const data = await fetchAudiobooks(cat.query || cat.id)
       setResults(data)
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
     } finally {

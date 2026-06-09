@@ -51,7 +51,7 @@ export const AUDIOBOOK_CATEGORIES = [
   { id: 'nature', label: 'Nature', icon: '🌿', image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80' },
   { id: 'classic', label: 'Classic', icon: '📖', image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400&q=80' },
   { id: 'romance', label: 'Romance', icon: '❤️', image: 'https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=400&q=80' },
-  { id: 'scifi', label: 'Sci-Fi', icon: '🚀', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80' },
+  { id: 'scifi', label: 'Sci-Fi', icon: '🚀', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80', query: 'science fiction' },
   { id: 'biography', label: 'Biography', icon: '👤', image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&q=80' },
 ]
 
