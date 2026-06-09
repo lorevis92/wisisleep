@@ -78,10 +78,13 @@ export function usePlayer() {
         const a = audioRef.current
         if (a) {
           a.src = next.audioUrl
+          a.loop = next.type === 'sounds'
           a.play().catch(console.warn)
         }
         setCurrentTrack(next)
         setProgress(0)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: next, progress: 0 }))
+        saveToHistory(next)
       } else {
         setIsPlaying(false)
       }
@@ -208,6 +211,11 @@ export function usePlayer() {
     })
   }, [])
 
+  const clearQueue = useCallback(() => {
+    setQueue([])
+    queueRef.current = []
+  }, [])
+
   return {
     currentTrack,
     isPlaying,
@@ -225,5 +233,6 @@ export function usePlayer() {
     startTimer,
     cancelTimer,
     addToQueue,
+    clearQueue,
   }
 }

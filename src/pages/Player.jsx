@@ -8,7 +8,7 @@ const TYPE_LABELS = { sounds: 'Nature Sound', music: 'Sleep Music', podcast: 'Po
 export default function Player({
   currentTrack, isPlaying, progress, duration,
   volume, sleepTimer, timeLeft, isFading,
-  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay,
+  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay, onRestartBook,
 }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 640)
   const [customMinutes, setCustomMinutes] = useState(30)
@@ -249,12 +249,24 @@ export default function Player({
       {/* 4. CHAPTERS ROW */}
       {isAudiobook && allChapters?.length > 0 && (
         <div style={{ padding: '0 20px 12px' }}>
-          <div style={{
-            fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
-            color: '#666666', textTransform: 'uppercase', letterSpacing: '0.06em',
-            marginBottom: 8,
-          }}>
-            Chapters
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+              color: '#666666', textTransform: 'uppercase', letterSpacing: '0.06em',
+            }}>
+              Chapters
+            </span>
+            <button
+              onClick={() => onRestartBook?.(allChapters)}
+              style={{
+                fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 10,
+                textTransform: 'uppercase', letterSpacing: '0.04em',
+                color: '#AAAAAA', border: '1px solid #E8E8E8', borderRadius: 3,
+                padding: '3px 8px', background: 'transparent', cursor: 'pointer',
+              }}
+            >
+              ↺ Restart
+            </button>
           </div>
           <div style={{ display: 'flex', overflowX: 'auto', gap: 6, paddingBottom: 4 }}>
             {allChapters.map((ch, i) => {

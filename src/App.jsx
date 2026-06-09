@@ -17,7 +17,7 @@ export default function App() {
     currentTrack, isPlaying, progress, duration,
     volume, sleepTimer, timeLeft, isFading,
     playTrack, togglePlay, seek, setVolume,
-    startTimer, cancelTimer, addToQueue,
+    startTimer, cancelTimer, addToQueue, clearQueue,
   } = usePlayer()
 
   const { library, addToLibrary, removeFromLibrary, isInLibrary, clearLibrary } = useLibrary()
@@ -38,6 +38,12 @@ export default function App() {
   const handlePlay = (track) => {
     playTrack(track)
     handleTabChange('player')
+  }
+
+  const handleRestartBook = (chapters) => {
+    clearQueue()
+    playTrack({ ...chapters[0], allChapters: chapters })
+    chapters.slice(1).forEach(ch => addToQueue({ ...ch, allChapters: chapters }))
   }
 
   const handleNavigate = (section) => {
@@ -113,6 +119,7 @@ export default function App() {
             onCancelTimer={cancelTimer}
             onPlay={handlePlay}
             onChapterPlay={handlePlay}
+            onRestartBook={handleRestartBook}
           />
         )}
         {activeTab === 'library' && (

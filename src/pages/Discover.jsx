@@ -506,8 +506,18 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
           tags: [],
           description: track.description,
         }))
-        onPlayProp({ ...allChapters[0], allChapters })
-        sections.slice(1).forEach((_, i) => addToQueue({ ...allChapters[i + 1], allChapters }))
+        let startIndex = 0
+        try {
+          const history = JSON.parse(localStorage.getItem('wisisleep_history') || '[]')
+          const saved = history.find(item => item.id?.startsWith(track.id + '-ch'))
+          if (saved) {
+            const foundIdx = allChapters.findIndex(ch => ch.id === saved.id)
+            if (foundIdx !== -1) startIndex = foundIdx
+          }
+        } catch {}
+
+        onPlayProp({ ...allChapters[startIndex], allChapters })
+        allChapters.slice(startIndex + 1).forEach(ch => addToQueue({ ...ch, allChapters }))
       } catch (e) {
         console.error('Failed to load chapters:', e)
       } finally {
