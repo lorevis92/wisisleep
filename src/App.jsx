@@ -89,7 +89,7 @@ export default function App() {
         }}
       />
 
-      <main style={{ paddingBottom: currentTrack ? 120 : 40 }}>
+      <main style={{ paddingBottom: currentTrack ? 95 : 0 }}>
         {activeTab === 'discover' && (
           <Discover
             onPlay={handlePlay}
@@ -132,8 +132,9 @@ export default function App() {
             onClear={clearLibrary}
           />
         )}
-        <Footer />
       </main>
+
+      <Footer />
 
       <AudioPlayer
         currentTrack={currentTrack}
