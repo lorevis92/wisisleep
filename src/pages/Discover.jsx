@@ -600,7 +600,7 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
 
   // ── Homepage ──
   return (
-    <div style={{ padding: '24px 20px 24px', maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ padding: '24px 20px 0', maxWidth: 900, margin: '0 auto' }}>
       {continueItems.length > 0 && (
         <Section title="Continue Listening" items={continueItems} loading={false}
           onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId} />

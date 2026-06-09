@@ -89,7 +89,7 @@ export default function App() {
         }}
       />
 
-      <main style={{ paddingBottom: currentTrack ? 95 : 0 }}>
+      <main>
         {activeTab === 'discover' && (
           <Discover
             onPlay={handlePlay}
@@ -134,7 +134,7 @@ export default function App() {
         )}
       </main>
 
-      <Footer />
+      {!currentTrack && <Footer />}
 
       <AudioPlayer
         currentTrack={currentTrack}
