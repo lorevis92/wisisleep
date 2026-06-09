@@ -417,21 +417,56 @@ async function fetchRecommended(analysis) {
   return { tracks: tracks.slice(0, 10), label: 'Recommended for You' }
 }
 
+const EXPLORE_CARDS = [
+  { id: 'nature', label: 'Nature Sounds', icon: '🌿', image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=80' },
+  { id: 'sleep-music', label: 'Sleep Music', icon: '🎵', image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600&q=80' },
+  { id: 'audiobooks', label: 'Audiobooks', icon: '📚', image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80' },
+  { id: 'podcasts', label: 'Podcasts', icon: '🎙️', image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&q=80' },
+]
+
+function ExploreCard({ card, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onClick={() => onClick(card.id)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        height: 160, borderRadius: 8, overflow: 'hidden',
+        position: 'relative', cursor: 'pointer',
+        transform: hovered ? 'scale(1.02)' : 'scale(1)',
+        transition: 'transform 0.2s ease',
+      }}
+    >
+      <img
+        src={card.image} alt={card.label}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.65))',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        display: 'flex', alignItems: 'center', gap: 8, padding: 16,
+      }}>
+        <span style={{ fontSize: 24 }}>{card.icon}</span>
+        <span style={{
+          fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15,
+          color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em',
+        }}>{card.label}</span>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Discover ────────────────────────────────────────────────────────────
 export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isInLibrary, addToQueue, activeSection, onSectionConsumed, resetKey }) {
   const [activeView, setActiveView] = useState(null) // null | 'nature' | 'sleep-music' | 'audiobooks' | 'podcasts'
   const [continueItems, setContinueItems] = useState([])
-  const [natureTracks, setNatureTracks] = useState([])
-  const [musicTracks, setMusicTracks] = useState([])
-  const [bookTracks, setBookTracks] = useState([])
-  const [podcastTracks, setPodcastTracks] = useState([])
   const [recommendedTracks, setRecommendedTracks] = useState([])
   const [recommendedLabel, setRecommendedLabel] = useState('Popular')
   const [loadingRecommended, setLoadingRecommended] = useState(true)
-  const [loadingNature, setLoadingNature] = useState(true)
-  const [loadingMusic, setLoadingMusic] = useState(true)
-  const [loadingBooks, setLoadingBooks] = useState(true)
-  const [loadingPods, setLoadingPods] = useState(true)
   const [loadingId, setLoadingId] = useState(null)
 
   useEffect(() => {
@@ -453,22 +488,6 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
     fetchRecommended(analysis)
       .then(({ tracks, label }) => { setRecommendedTracks(tracks); setRecommendedLabel(label) })
       .finally(() => setLoadingRecommended(false))
-
-    fetchNatureSoundsFromDB('rain')
-      .then(d => setNatureTracks(d.slice(0, 10)))
-      .finally(() => setLoadingNature(false))
-
-    fetchSleepMusic()
-      .then(d => setMusicTracks(d.slice(0, 10)))
-      .finally(() => setLoadingMusic(false))
-
-    fetchAudiobooks('mystery')
-      .then(d => setBookTracks(d.slice(0, 10)))
-      .finally(() => setLoadingBooks(false))
-
-    fetchPodcasts('sleep meditation')
-      .then(d => setPodcastTracks(d.slice(0, 10)))
-      .finally(() => setLoadingPods(false))
   }, [])
 
   const handlePlay = async (track) => {
@@ -540,13 +559,6 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
       return
     }
 
-    if (track.type === 'music') {
-      onPlayProp(track)
-      const others = musicTracks.filter(t => t.subcategory === track.subcategory && t.id !== track.id)
-      others.sort(() => Math.random() - 0.5).forEach(t => addToQueue(t))
-      return
-    }
-
     onPlayProp(track)
   }
 
@@ -589,18 +601,22 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
       )}
       <Section title={recommendedLabel} items={recommendedTracks} loading={loadingRecommended}
         onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId} />
-      <Section title="Nature Sounds" id="nature-sounds" items={natureTracks} loading={loadingNature}
-        onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId}
-        onSeeAll={() => setActiveView('nature')} />
-      <Section title="Sleep Music" id="sleep-music" items={musicTracks} loading={loadingMusic}
-        onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId}
-        onSeeAll={() => setActiveView('sleep-music')} />
-      <Section title="Audiobooks" id="audiobooks" items={bookTracks} loading={loadingBooks}
-        onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId}
-        onSeeAll={() => setActiveView('audiobooks')} />
-      <Section title="Podcasts" id="podcasts" items={podcastTracks} loading={loadingPods}
-        onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId}
-        onSeeAll={() => setActiveView('podcasts')} />
+
+      <div style={{ marginBottom: 36 }}>
+        <h2 style={{
+          fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14,
+          textTransform: 'uppercase', color: '#111111', letterSpacing: '0.04em',
+          marginBottom: 12,
+        }}>
+          Explore
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {EXPLORE_CARDS.map(card => (
+            <ExploreCard key={card.id} card={card} onClick={setActiveView} />
+          ))}
+        </div>
+      </div>
+
       <Styles />
     </div>
   )
