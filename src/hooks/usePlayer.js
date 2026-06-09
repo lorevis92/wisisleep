@@ -68,20 +68,6 @@ export function usePlayer() {
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration)
     })
-    audio.addEventListener('ended', () => {
-      if (queueRef.current.length > 0) {
-        const [next, ...rest] = queueRef.current
-        queueRef.current = rest
-        setQueue(rest)
-        audio.src = next.audioUrl
-        audio.play().catch(e => console.warn('Play error:', e))
-        setCurrentTrack(next)
-        setProgress(0)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: next, progress: 0 }))
-      } else {
-        setIsPlaying(false)
-      }
-    })
     audio.addEventListener('play', () => setIsPlaying(true))
     audio.addEventListener('pause', () => setIsPlaying(false))
 
@@ -120,6 +106,23 @@ export function usePlayer() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: track, progress: 0 }))
     saveToHistory(track)
   }, [volume])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const handleEnded = () => {
+      if (currentTrack?.type === 'sounds') return
+      if (queue.length > 0) {
+        const [next, ...rest] = queue
+        setQueue(rest)
+        playTrack(next)
+      } else {
+        setIsPlaying(false)
+      }
+    }
+    audio.addEventListener('ended', handleEnded)
+    return () => audio.removeEventListener('ended', handleEnded)
+  }, [currentTrack, queue, playTrack])
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current
