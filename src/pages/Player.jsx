@@ -8,7 +8,7 @@ const TYPE_LABELS = { sounds: 'Nature Sound', music: 'Sleep Music', podcast: 'Po
 export default function Player({
   currentTrack, isPlaying, progress, duration,
   volume, sleepTimer, timeLeft, isFading,
-  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay, onRestartBook,
+  onTogglePlay, onSeek, onVolume, onStartTimer, onCancelTimer, onPlay, onChapterPlay, onRestartBook, onBack,
 }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 640)
   const [customMinutes, setCustomMinutes] = useState(30)
@@ -47,6 +47,17 @@ export default function Player({
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', paddingTop: 8 }}>
+      <button
+        onClick={onBack}
+        style={{
+          fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11,
+          textTransform: 'uppercase', letterSpacing: '0.04em',
+          color: '#666666', background: 'transparent', border: 'none',
+          cursor: 'pointer', padding: '0 0 16px 20px',
+        }}
+      >
+        ← Back
+      </button>
 
       {/* 1. TOP ROW */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 20px 12px' }}>

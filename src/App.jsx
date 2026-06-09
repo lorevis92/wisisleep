@@ -34,8 +34,10 @@ export default function App() {
 
   const [activeSection, setActiveSection] = useState(null)
   const [discoverResetKey, setDiscoverResetKey] = useState(0)
+  const [previousTab, setPreviousTab] = useState('discover')
 
   const handlePlay = (track) => {
+    setPreviousTab(activeTab)
     playTrack(track)
     handleTabChange('player')
   }
@@ -120,6 +122,7 @@ export default function App() {
             onPlay={handlePlay}
             onChapterPlay={handlePlay}
             onRestartBook={handleRestartBook}
+            onBack={() => handleTabChange(previousTab)}
           />
         )}
         {activeTab === 'library' && (
