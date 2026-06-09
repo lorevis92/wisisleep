@@ -6,7 +6,6 @@ export default function Footer() {
       borderTop: `1px solid ${T.border}`,
       background: T.surface,
       padding: '20px',
-      marginTop: 40,
       marginBottom: 0,
       display: 'flex',
       alignItems: 'center',
