@@ -426,6 +426,12 @@ const EXPLORE_CARDS = [
 
 function ExploreCard({ card, onClick }) {
   const [hovered, setHovered] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 640)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
   return (
     <div
       onClick={() => onClick(card.id)}
@@ -450,9 +456,9 @@ function ExploreCard({ card, onClick }) {
         position: 'absolute', bottom: 0, left: 0, right: 0,
         display: 'flex', alignItems: 'center', gap: 8, padding: 16,
       }}>
-        <span style={{ fontSize: 24 }}>{card.icon}</span>
+        {!isMobile && <span style={{ fontSize: 24 }}>{card.icon}</span>}
         <span style={{
-          fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15,
+          fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: isMobile ? 12 : 15,
           color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em',
         }}>{card.label}</span>
       </div>
