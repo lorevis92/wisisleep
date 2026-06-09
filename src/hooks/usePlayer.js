@@ -70,6 +70,22 @@ export function usePlayer() {
     })
     audio.addEventListener('play', () => setIsPlaying(true))
     audio.addEventListener('pause', () => setIsPlaying(false))
+    audio.addEventListener('ended', () => {
+      if (queueRef.current.length > 0) {
+        const [next, ...rest] = queueRef.current
+        queueRef.current = rest
+        setQueue(rest)
+        const a = audioRef.current
+        if (a) {
+          a.src = next.audioUrl
+          a.play().catch(console.warn)
+        }
+        setCurrentTrack(next)
+        setProgress(0)
+      } else {
+        setIsPlaying(false)
+      }
+    })
 
     // Save progress every 5s while playing
     saveIntervalRef.current = setInterval(() => {
@@ -106,23 +122,6 @@ export function usePlayer() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ trackData: track, progress: 0 }))
     saveToHistory(track)
   }, [volume])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    const handleEnded = () => {
-      if (currentTrack?.type === 'sounds') return
-      if (queue.length > 0) {
-        const [next, ...rest] = queue
-        setQueue(rest)
-        playTrack(next)
-      } else {
-        setIsPlaying(false)
-      }
-    }
-    audio.addEventListener('ended', handleEnded)
-    return () => audio.removeEventListener('ended', handleEnded)
-  }, [currentTrack, queue, playTrack])
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current
