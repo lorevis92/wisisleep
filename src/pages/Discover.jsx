@@ -608,7 +608,7 @@ export default function Discover({ onPlay: onPlayProp, currentTrack, onSave, isI
       <Section title={recommendedLabel} items={recommendedTracks} loading={loadingRecommended}
         onPlay={handlePlay} currentTrack={currentTrack} loadingId={loadingId} />
 
-      <div style={{ marginBottom: 36 }}>
+      <div>
         <h2 style={{
           fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14,
           textTransform: 'uppercase', color: '#111111', letterSpacing: '0.04em',
